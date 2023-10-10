@@ -3,3 +3,5 @@ plugins {
 }
 
 rootProject.name = "ideavim-flash"
+
+include("IdeaVIM")

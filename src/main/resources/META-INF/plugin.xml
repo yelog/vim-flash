@@ -1,18 +1,35 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.yelog.ideavimflash</id>
-    <name>ideavim-flash Template</name>
-    <vendor>yelog</vendor>
+    <id>org.yelog.ideavim-flash</id>
+    <name>ideavim-flash</name>
+    <vendor email="jaytp@qq.com" url="https://yelog.org/">yelog</vendor>
+
+    <description><![CDATA[
+    like <a href="https://github.com/folke/flash.nvim">flash.nvim</a>, lets you navigate your code with search labels, enhanced character motions
+    ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
 
-    <resource-bundle>messages.MyBundle</resource-bundle>
-
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.yelog.ideavimflash.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <applicationService serviceImplementation="org.yelog.ideavim.flash.UserConfig"/>
+        <applicationConfigurable instance="org.yelog.ideavim.flash.Configurable"/>
     </extensions>
 
-    <applicationListeners>
-        <listener class="com.github.yelog.ideavimflash.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
-    </applicationListeners>
+    <actions>
+        <action id="KJumpAction" class="org.yelog.ideavim.flash.KJumpAction" text="KJump"
+                description="Input 1 character and jump to any same character."/>
+        <action id="KJumpAction.Char2" class="org.yelog.ideavim.flash.Char2Action" text="KJump Char 2"
+                description="Input 2 character and jump to any same character."/>
+        <action id="KJumpAction.Word0" class="org.yelog.ideavim.flash.Word0Action" text="KJump Word 0"
+                description="Jump to any word."/>
+        <action id="KJumpAction.Word1" class="org.yelog.ideavim.flash.Word1Action" text="KJump Word 1"
+                description="Input 1 character and jump to any word start with this character."/>
+        <action id="KJumpAction.Line" class="org.yelog.ideavim.flash.LineAction" text="KJump Line"
+                description="Jump to any line."/>
+        <action id="KJumpAction.Word1GotoDeclaration" class="org.yelog.ideavim.flash.GotoDeclarationWord1Action"
+                text="KJump Word 1 Goto Declaration"
+                description="Input 1 character and jump to declaration of any word start with this character."/>
+
+    </actions>
+
 </idea-plugin>
