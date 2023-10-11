@@ -16,7 +16,7 @@
     </extensions>
 
     <actions>
-        <action id="KJumpAction" class="org.yelog.ideavim.flash.KJumpAction" text="KJump"
+        <action id="ideavim.search" class="org.yelog.ideavim.flash.KJumpAction" text="KJump"
                 description="Input 1 character and jump to any same character."/>
         <action id="KJumpAction.Char2" class="org.yelog.ideavim.flash.Char2Action" text="KJump Char 2"
                 description="Input 2 character and jump to any same character."/>

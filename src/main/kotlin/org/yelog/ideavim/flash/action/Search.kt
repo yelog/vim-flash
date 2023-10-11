@@ -1,45 +1,50 @@
-package com.github.yelog.ideavimflash.finder
+package org.yelog.ideavim.flash.action
 
+import ai.grazie.utils.findAllMatches
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
 import org.yelog.ideavim.flash.KeyTagsGenerator
 import org.yelog.ideavim.flash.MarksCanvas
 import org.yelog.ideavim.flash.UserConfig
 import org.yelog.ideavim.flash.utils.findAll
+import java.util.ArrayList
 import kotlin.math.abs
 
-private const val STATE_WAIT_SEARCH_CHAR = 0
-private const val STATE_WAIT_KEY = 1
 
 class Search : Finder {
-    private var state = STATE_WAIT_SEARCH_CHAR
-    private lateinit var s: String
+    private lateinit var visibleString: String
     private lateinit var visibleRange: TextRange
+    private var searchString = ""
 
-    override fun start(e: Editor, s: String, visibleRange: TextRange): List<MarksCanvas.Mark>? {
-        this.s = s
+    override fun start(e: Editor, visibleString: String, visibleRange: TextRange): List<MarksCanvas.Mark>? {
+        this.visibleString = visibleString
         this.visibleRange = visibleRange
-        state = STATE_WAIT_SEARCH_CHAR
+        this.searchString = ""
         return null
     }
 
     override fun input(e: Editor, c: Char, lastMarks: List<MarksCanvas.Mark>): List<MarksCanvas.Mark> {
-        return when (state) {
-            STATE_WAIT_SEARCH_CHAR -> {
-                val caretOffset = e.caretModel.offset
-                val offsets = s.findAll(c, c.isLowerCase())
-                    .map { it + visibleRange.startOffset }
-                    .sortedBy { abs(it - caretOffset) }
-                    .toList()
+        if (lastMarks.any { it.keyTag.contains(c) }) {
+            // hit a tag
+            return advanceMarks(c, lastMarks);
+        } else {
+            // keep on searching
+            this.searchString += c
+            val caretOffset = e.caretModel.offset
+            val offsets = visibleString.findAll(this.searchString, this.searchString.all { it.isLowerCase() })
+                .map { it + visibleRange.startOffset }
+                .sortedBy { abs(it - caretOffset) }
+                .toList()
 
-                val tags = KeyTagsGenerator.createTagsTree(offsets.size, UserConfig.getDataBean().characters)
-                state = STATE_WAIT_KEY
-                offsets.zip(tags)
-                    .map { MarksCanvas.Mark(it.second, it.first) }
-                    .toList()
+            val nextCharList = Regex("(?<="+this.searchString+")(.)", RegexOption.IGNORE_CASE).findAllMatches(this.visibleString).map { it.value }.distinct()
+            var remainCharacter = UserConfig.getDataBean().characters
+            for (s in nextCharList) {
+                remainCharacter = remainCharacter.replace(s, "")
             }
-            STATE_WAIT_KEY -> advanceMarks(c, lastMarks)
-            else -> throw RuntimeException("Impossible.")
+            val tags = KeyTagsGenerator.createTagsTree(offsets.size, remainCharacter)
+            return offsets.zip(tags)
+                .map { MarksCanvas.Mark(it.second, it.first, this.searchString.length) }
+                .toList()
         }
     }
 }

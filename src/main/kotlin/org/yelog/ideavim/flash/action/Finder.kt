@@ -1,4 +1,4 @@
-package com.github.yelog.ideavimflash.finder
+package org.yelog.ideavim.flash.action
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
@@ -9,7 +9,7 @@ interface Finder {
      * @return null - need more input to locate.
      *         not null - can be locate some data, empty represent without any matches.
      */
-    fun start(e: Editor, s: String, visibleRange: TextRange): List<MarksCanvas.Mark>?
+    fun start(e: Editor, visibleString: String, visibleRange: TextRange): List<MarksCanvas.Mark>?
 
     /**
      * @return same with [.start]
@@ -22,7 +22,7 @@ interface Finder {
     fun advanceMarks(c: Char, marks: List<MarksCanvas.Mark>): List<MarksCanvas.Mark> {
         return marks.filter { it.keyTag[it.advanceIndex] == c }
             .map {
-                MarksCanvas.Mark(it.keyTag, it.offset, it.advanceIndex + 1)
+                MarksCanvas.Mark(it.keyTag, it.offset, it.charLength, it.advanceIndex + 1)
             }
             .toList()
     }

@@ -1,4 +1,4 @@
-package com.github.yelog.ideavimflash.finder
+package org.yelog.ideavim.flash.action
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
@@ -15,8 +15,8 @@ class Word1Finder : Finder {
     private lateinit var s: String
     private lateinit var visibleRange: TextRange
 
-    override fun start(e: Editor, s: String, visibleRange: TextRange): List<MarksCanvas.Mark>? {
-        this.s = s
+    override fun start(e: Editor, visibleString: String, visibleRange: TextRange): List<MarksCanvas.Mark>? {
+        this.s = visibleString
         this.visibleRange = visibleRange
         state = STATE_WAIT_SEARCH_CHAR
         return null

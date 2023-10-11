@@ -1,8 +1,8 @@
 package org.yelog.ideavim.flash
 
-import org.yelog.ideavim.flash.utils.offsetToXYCompat
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorFontType
+import org.yelog.ideavim.flash.utils.offsetToXYCompat
 import java.awt.*
 import javax.swing.JComponent
 
@@ -37,19 +37,29 @@ class MarksCanvas : JComponent() {
             .map { mEditor.offsetToXYCompat(it.offset) }
             .toList()
 
-        g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER)
         mMarks.zip(coordinates)
             .sortedBy { it.second.x }
             .forEach {
                 g2d.color = Color(config.backgroundColor, true)
                 val keyTag = it.first.keyTag
-                val bounds = mFontMetrics.getStringBounds(keyTag.substring(it.first.advanceIndex), g).bounds
+                val charBounds = mFontMetrics.getStringBounds("x", g).bounds
+                // draw match text background
+                g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f)// 设置透明度
+                g2d.fillRect(it.second.x - x, it.second.y - y, charBounds.width * it.first.charLength, charBounds.height)
 
-                g2d.fillRect(it.second.x - x, it.second.y - y, bounds.width, bounds.height)
+                g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER)
+                val bounds = mFontMetrics.getStringBounds(keyTag.substring(it.first.advanceIndex), g).bounds
+                // draw index background
+                g2d.fillRect(
+                    it.second.x - x + it.first.charLength * charBounds.width,
+                    it.second.y - y,
+                    bounds.width,
+                    bounds.height
+                )
                 g2d.font = mFont
 
-                val xInCanvas = it.second.x - x
-                val yInCanvas = it.second.y - y + bounds.height - mFontMetrics.descent
+                val xInCanvas = it.second.x - x + it.first.charLength * bounds.width
+                val yInCanvas = it.second.y - y + bounds.height - mFontMetrics.descent + 2
                 if (keyTag.length == 2) {
                     if (it.first.advanceIndex == 0) {
                         val midX = xInCanvas + bounds.width / 2
@@ -73,5 +83,5 @@ class MarksCanvas : JComponent() {
         super.paint(g)
     }
 
-    class Mark(val keyTag: String, val offset: Int, val advanceIndex: Int = 0)
+    class Mark(val keyTag: String, val offset: Int, val charLength: Int = 0, val advanceIndex: Int = 0)
 }

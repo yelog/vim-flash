@@ -1,4 +1,4 @@
-package com.github.yelog.ideavimflash.finder
+package org.yelog.ideavim.flash.action
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
@@ -11,10 +11,10 @@ private val pattern = Regex("(?m)^")
 
 class LineFinder : Finder {
 
-    override fun start(e: Editor, s: String, visibleRange: TextRange): List<MarksCanvas.Mark> {
+    override fun start(e: Editor, visibleString: String, visibleRange: TextRange): List<MarksCanvas.Mark> {
         val cOffset = e.caretModel.offset
 
-        val offsets = pattern.findAll(s)
+        val offsets = pattern.findAll(visibleString)
             .map { it.range.first + visibleRange.startOffset }
             .sortedBy { abs(it - cOffset) }
             .toList()

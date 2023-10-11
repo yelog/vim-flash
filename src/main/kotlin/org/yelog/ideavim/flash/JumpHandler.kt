@@ -11,7 +11,7 @@ import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.actionSystem.TypedAction
 import com.intellij.openapi.editor.actionSystem.TypedActionHandler
 import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
-import com.github.yelog.ideavimflash.finder.*
+import org.yelog.ideavim.flash.action.*
 import org.yelog.ideavim.flash.utils.getVisibleRangeOffset
 
 object JumpHandler : TypedActionHandler {
@@ -132,6 +132,8 @@ object JumpHandler : TypedActionHandler {
         if (marks != null) {
             lastMarks = marks
             jumpOrShowCanvas(editor, lastMarks)
+        } else {
+            lastMarks = emptyList()
         }
     }
 
