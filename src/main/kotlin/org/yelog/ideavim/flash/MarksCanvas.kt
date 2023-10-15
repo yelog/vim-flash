@@ -2,6 +2,7 @@ package org.yelog.ideavim.flash
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorFontType
+import com.intellij.webSymbols.utils.findOriginalFile
 import org.yelog.ideavim.flash.utils.offsetToXYCompat
 import java.awt.*
 import javax.swing.JComponent
@@ -33,6 +34,7 @@ class MarksCanvas : JComponent() {
             RenderingHints.VALUE_TEXT_ANTIALIAS_ON
         )
 
+        // 计算开始坐标的位置, 用于给所有坐标做排序
         val coordinates = mMarks
             .map { mEditor.offsetToXYCompat(it.offset) }
             .toList()
@@ -45,21 +47,29 @@ class MarksCanvas : JComponent() {
                 val charBounds = mFontMetrics.getStringBounds("x", g).bounds
                 // draw match text background
                 g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f)// 设置透明度
-                g2d.fillRect(it.second.x - x, it.second.y - y, charBounds.width * it.first.charLength, charBounds.height)
+                // 给每个查询字符挨个渲染, 防止 soft-wrap 换行
+                for (i in 0 until it.first.charLength) {
+                    mEditor.offsetToXYCompat(it.first.offset + i).let { offset ->
+                        g2d.fillRect(offset.x - x, offset.y - y, charBounds.width, charBounds.height)
+                    }
+                }
+
+                // 计算标记的位置
+                val markOffset = mEditor.offsetToXYCompat(it.first.offset + it.first.charLength)
 
                 g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER)
                 val bounds = mFontMetrics.getStringBounds(keyTag.substring(it.first.advanceIndex), g).bounds
                 // draw index background
                 g2d.fillRect(
-                    it.second.x - x + it.first.charLength * charBounds.width,
-                    it.second.y - y,
+                    markOffset.x - x,
+                    markOffset.y - y,
                     bounds.width,
                     bounds.height
                 )
                 g2d.font = mFont
 
-                val xInCanvas = it.second.x - x + it.first.charLength * bounds.width
-                val yInCanvas = it.second.y - y + bounds.height - mFontMetrics.descent + 2
+                val xInCanvas = markOffset.x - x
+                val yInCanvas = markOffset.y - y + bounds.height - mFontMetrics.descent + 2
                 if (keyTag.length == 2) {
                     if (it.first.advanceIndex == 0) {
                         val midX = xInCanvas + bounds.width / 2
