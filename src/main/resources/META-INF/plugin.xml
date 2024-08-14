@@ -19,8 +19,6 @@
     <actions>
         <action id="flash.search" class="org.yelog.ideavim.flash.SearchAction" text="Search"
                 description="Input 1 character and jump to any same character."/>
-        <action id="flash.gotoRecent" class="org.yelog.ideavim.flash.GotoRecent" text="KJump"
-                description="Input 1 character and jump to any same character."/>
     </actions>
 
 </idea-plugin>

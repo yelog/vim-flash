@@ -1,7 +1,7 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>org.yelog.ideavim.flash</id>
-<!--  origin name ideavim-flash, because forib  -->
+    <!--  origin name ideavim-flash, because prohibit by jetbrain  -->
     <name>vim-flash</name>
     <vendor email="jaytp@qq.com" url="https://yelog.org">yelog</vendor>
 
@@ -18,8 +18,6 @@
 
     <actions>
         <action id="flash.search" class="org.yelog.ideavim.flash.SearchAction" text="Search"
-                description="Input 1 character and jump to any same character."/>
-        <action id="flash.gotoRecent" class="org.yelog.ideavim.flash.GotoRecent" text="KJump"
                 description="Input 1 character and jump to any same character."/>
     </actions>
 
