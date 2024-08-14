@@ -17,26 +17,10 @@ abstract class BaseAction : DumbAwareAction() {
     abstract fun getMode(): Int
 }
 
-class KJumpAction : BaseAction() {
+class SearchAction : BaseAction() {
     override fun getMode() = JumpHandler.MODE_CHAR1
 }
 
-class Char2Action : BaseAction() {
+class GotoRecent : BaseAction() {
     override fun getMode() = JumpHandler.MODE_CHAR2
-}
-
-class Word0Action : BaseAction() {
-    override fun getMode() = JumpHandler.MODE_WORD0
-}
-
-class Word1Action : BaseAction() {
-    override fun getMode() = JumpHandler.MODE_WORD1
-}
-
-class LineAction : BaseAction() {
-    override fun getMode() = JumpHandler.MODE_LINE
-}
-
-class GotoDeclarationWord1Action : BaseAction() {
-    override fun getMode() = JumpHandler.MODE_WORD1_DECLARATION
 }

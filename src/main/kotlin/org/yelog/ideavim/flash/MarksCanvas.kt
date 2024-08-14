@@ -2,7 +2,6 @@ package org.yelog.ideavim.flash
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorFontType
-import com.intellij.webSymbols.utils.findOriginalFile
 import org.yelog.ideavim.flash.utils.offsetToXYCompat
 import java.awt.*
 import javax.swing.JComponent
@@ -93,5 +92,5 @@ class MarksCanvas : JComponent() {
         super.paint(g)
     }
 
-    class Mark(val keyTag: String, val offset: Int, val charLength: Int = 0, val advanceIndex: Int = 0)
+    class Mark(val keyTag: String, val offset: Int, val charLength: Int = 0, val advanceIndex: Int = 0, val hintMark: Boolean = false)
 }

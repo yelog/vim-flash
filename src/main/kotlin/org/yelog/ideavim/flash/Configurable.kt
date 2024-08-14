@@ -14,7 +14,7 @@ class Configurable : Configurable {
     }
 
     override fun getDisplayName(): String {
-        return "KJump"
+        return "IdeaVim-Flash"
     }
 
     override fun apply() {

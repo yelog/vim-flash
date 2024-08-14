@@ -1,18 +1,19 @@
 package org.yelog.ideavim.flash
 
-import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.actionSystem.DataContext
+import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.actionSystem.DocCommandGroupId
-import com.intellij.openapi.editor.actionSystem.EditorActionHandler
-import com.intellij.openapi.editor.actionSystem.EditorActionManager
-import com.intellij.openapi.editor.actionSystem.TypedAction
-import com.intellij.openapi.editor.actionSystem.TypedActionHandler
+import com.intellij.openapi.editor.actionSystem.*
 import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
-import org.yelog.ideavim.flash.action.*
+import org.yelog.ideavim.flash.action.Finder
+import org.yelog.ideavim.flash.action.Search
 import org.yelog.ideavim.flash.utils.getVisibleRangeOffset
+
 
 object JumpHandler : TypedActionHandler {
     const val MODE_CHAR1 = 0
@@ -24,6 +25,7 @@ object JumpHandler : TypedActionHandler {
 
     private var mOldTypedHandler: TypedActionHandler? = null
     private var mOldEscActionHandler: EditorActionHandler? = null
+    private var mOldBackSpaceActionHandler: EditorActionHandler? = null
     private val mMarksCanvas = MarksCanvas()
     private var isStart = false
     private lateinit var finder: Finder
@@ -39,18 +41,28 @@ object JumpHandler : TypedActionHandler {
         }
     }
 
+    // 当按下 esc 时
     private val escActionHandler: EditorActionHandler = object : EditorActionHandler() {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
             stop()
         }
     }
 
+    // 当按下删除键时
+    private val backSpaceActionHandler: EditorActionHandler = object : EditorActionHandler() {
+        override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
+            stop()
+        }
+    }
+
+
     private fun jumpOrShowCanvas(e: Editor, marks: List<MarksCanvas.Mark>) {
         when {
             marks.isEmpty() -> {
                 stop()
             }
-            marks.size == 1 -> {
+
+            marks.size == 1 && marks[0].hintMark -> {
                 // only one found, just jump to it
                 val caret = e.caretModel.currentCaret
                 if (caret.hasSelection()) {
@@ -71,7 +83,7 @@ object JumpHandler : TypedActionHandler {
                                     includeCurrentCommandAsNavigation()
                                     includeCurrentPlaceAsChangePlace()
                                 }
-                            }, "KJumpHistoryAppender", DocCommandGroupId.noneGroupId(document),
+                            }, "IdeaVimFlashHistoryAppender", DocCommandGroupId.noneGroupId(document),
                             UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION, document
                         )
                     }
@@ -81,6 +93,7 @@ object JumpHandler : TypedActionHandler {
                 stop()
                 onJump?.invoke()
             }
+
             else -> {
                 if (!isCanvasAdded) {
                     mMarksCanvas.sync(e)
@@ -108,22 +121,13 @@ object JumpHandler : TypedActionHandler {
         typedAction.setupRawHandler(this)
         mOldEscActionHandler = manager.getActionHandler(IdeActions.ACTION_EDITOR_ESCAPE)
         manager.setActionHandler(IdeActions.ACTION_EDITOR_ESCAPE, escActionHandler)
+        mOldBackSpaceActionHandler = manager.getActionHandler(IdeActions.ACTION_EDITOR_BACKSPACE)
+        manager.setActionHandler(IdeActions.ACTION_EDITOR_BACKSPACE, backSpaceActionHandler)
+
         onJump = null
         when (mode) {
             MODE_CHAR1 -> finder = Search()
-            MODE_CHAR2 -> finder = Char2Finder()
-            MODE_WORD0 -> finder = Word0Finder()
-            MODE_WORD1 -> finder = Word1Finder()
-            MODE_LINE -> finder = LineFinder()
-            MODE_WORD1_DECLARATION -> {
-                finder = Word1Finder()
-                onJump = {
-                    ActionManager
-                        .getInstance()
-                        .getAction(IdeActions.ACTION_GOTO_DECLARATION)
-                        .actionPerformed(anActionEvent)
-                }
-            }
+            MODE_CHAR2 -> finder = Search()
             else -> throw RuntimeException("Invalid start mode: $mode")
         }
         val visibleBorderOffset = editor.getVisibleRangeOffset()
@@ -144,6 +148,9 @@ object JumpHandler : TypedActionHandler {
             TypedAction.getInstance().setupRawHandler(mOldTypedHandler!!)
             if (mOldEscActionHandler != null) {
                 manager.setActionHandler(IdeActions.ACTION_EDITOR_ESCAPE, mOldEscActionHandler!!)
+            }
+            if (mOldBackSpaceActionHandler != null) {
+                manager.setActionHandler(IdeActions.ACTION_EDITOR_BACKSPACE, mOldBackSpaceActionHandler!!)
             }
             val parent = mMarksCanvas.parent
             if (parent != null) {
