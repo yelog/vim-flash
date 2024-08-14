@@ -1,6 +1,6 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
-# ideavim-flash Changelog
+# vim-flash Changelog
 
 ## [Unreleased]
 ### Added

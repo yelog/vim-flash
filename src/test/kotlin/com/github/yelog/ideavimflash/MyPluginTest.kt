@@ -1,4 +1,4 @@
-package com.github.yelog.ideavimflash
+package com.github.yelog.vimflash
 
 import com.intellij.ide.highlighter.XmlFileType
 import com.intellij.openapi.components.service

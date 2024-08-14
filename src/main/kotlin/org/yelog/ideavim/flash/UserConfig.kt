@@ -6,7 +6,7 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.XmlSerializerUtil
 
-@State(name = "IDEAVIMFLASH", storages = [Storage("IdeaVimFlash.xml")])
+@State(name = "VIMFLASH", storages = [Storage("VIMFLASH.xml")])
 class UserConfig : PersistentStateComponent<UserConfig.DataBean> {
     private val dataBean = DataBean()
     override fun getState(): DataBean {

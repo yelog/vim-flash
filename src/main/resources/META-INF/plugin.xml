@@ -1,8 +1,9 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>org.yelog.ideavim-flash</id>
-    <name>ideavim-flash</name>
-    <vendor email="jaytp@qq.com" url="https://yelog.org/">yelog</vendor>
+    <id>org.yelog.ideavim.flash</id>
+    <!--  origin name ideavim-flash, because prohibit by jetbrain  -->
+    <name>vim-flash</name>
+    <vendor email="jaytp@qq.com" url="https://yelog.org">yelog</vendor>
 
     <description><![CDATA[
     like <a href="https://github.com/folke/flash.nvim">flash.nvim</a>, lets you navigate your code with search labels, enhanced character motions

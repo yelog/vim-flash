@@ -14,7 +14,7 @@ class Configurable : Configurable {
     }
 
     override fun getDisplayName(): String {
-        return "IdeaVim-Flash"
+        return "vim-flash"
     }
 
     override fun apply() {
