@@ -11,3 +11,11 @@
 ## 0.0.1
 ### Added
 - Basic functionality
+
+## [Unreleased]
+
+### Optimization
+
+- Jump to the most recent match by pressing Enter
+
+
