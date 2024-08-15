@@ -1,7 +1,7 @@
 package org.yelog.ideavim.flash
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.XmlSerializerUtil
@@ -31,7 +31,7 @@ class UserConfig : PersistentStateComponent<UserConfig.DataBean> {
         const val DEFAULT_BG_COLOR = -0xff8534
 
         private val instance: UserConfig
-            get() = ServiceManager.getService(UserConfig::class.java)
+            get() = ApplicationManager.getApplication().getService(UserConfig::class.java)
 
         fun getDataBean(): DataBean {
             return instance.dataBean

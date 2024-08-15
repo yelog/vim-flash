@@ -2,6 +2,12 @@
 
 # vim-flash Changelog
 
-## [Unreleased]
+## 0.0.2
 ### Added
-- Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
+- Update description
+- Support latest IntelliJ IDEA
+- Fix issue of deprecated methods 
+
+## 0.0.1
+### Added
+- Basic functionality

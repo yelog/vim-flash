@@ -3,11 +3,55 @@
     <id>org.yelog.ideavim.flash</id>
     <!--  origin name ideavim-flash, because prohibit by jetbrain  -->
     <name>vim-flash</name>
-    <vendor email="jaytp@qq.com" url="https://yelog.org">yelog</vendor>
+    <vendor email="yelogeek@gmail.com" url="https://yelog.org">yelog</vendor>
 
     <description><![CDATA[
-    like <a href="https://github.com/folke/flash.nvim">flash.nvim</a>, lets you navigate your code with search labels, enhanced character motions
+        <h2>Like <a href="https://github.com/folke/flash.nvim">flash.nvim</a> on IdeaVim</h2>
+
+        <br />
+
+        <p>
+          lets you navigate your code with search labels, enhanced character motions
+        </p>
+
+        <h2>Usage</h2>
+        <p>
+          Add <code>nmap s :action flash.search<cr></code> to your <code>.ideavimrc</code> file.
+          <br>
+          Then you can use <code>s</code> and type the word you want to search for. The word will be highlighted in the editor.
+          <br>
+          Off course you can use other keybindings. for example <code>nmap <leader>s :action flash.search<cr></code>
+        </p>
+
+        <h2>Configuration</h2>
+        <p>
+          Find <code>Settings -> Others Settings -> vim-flash</code> to configure the plugin.
+          <br>
+        <ul>
+          <li>1. Characters: This This is the sequence of letters used in order of proximity from nearest to farthest between
+            the match and the current cursor.</li>
+          <li>2. Background color: This is the Background color of the match</li>
+        </ul>
+        </p>
+
+        <h2>Issues</h2>
+        <p>
+          Please log any issues to <a href="https://github.com/yelog/vim-flash/issues">vim-flash repo</a>
+        </p>
     ]]></description>
+
+    <change-notes><![CDATA[
+        <h2>0.0.2</h2>
+        <ul>
+            <li>Update description</li>
+            <li>Support latest IntelliJ IDEA</li>
+            <li>Fix issue of deprecated methods </li>
+        </ul>
+        <h2>0.0.1</h2>
+        <ul>
+            <li>Add plugin</li>
+        </ul>
+    ]]></change-notes>
 
     <depends>com.intellij.modules.platform</depends>
 
