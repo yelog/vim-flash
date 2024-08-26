@@ -9,19 +9,20 @@ import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.*
+import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.editor.markup.HighlighterTargetArea
+import com.intellij.openapi.editor.markup.RangeHighlighter
+import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import org.yelog.ideavim.flash.action.Finder
 import org.yelog.ideavim.flash.action.Search
 import org.yelog.ideavim.flash.utils.getVisibleRangeOffset
+import java.awt.Color
 
 
 object JumpHandler : TypedActionHandler {
     const val MODE_CHAR1 = 0
     const val MODE_CHAR2 = 1
-    const val MODE_WORD0 = 2
-    const val MODE_WORD1 = 3
-    const val MODE_LINE = 4
-    const val MODE_WORD1_DECLARATION = 5
 
     private var mOldTypedHandler: TypedActionHandler? = null
     private var mOldEscActionHandler: EditorActionHandler? = null
@@ -32,6 +33,9 @@ object JumpHandler : TypedActionHandler {
     private var onJump: (() -> Unit)? = null // Runnable that is called after jump
     private var lastMarks: List<MarksCanvas.Mark> = emptyList()
     private var isCanvasAdded = false
+
+    // List to keep track of the added highlighters
+    private val highlighters = mutableListOf<RangeHighlighter>()
 
     override fun execute(e: Editor, c: Char, dc: DataContext) {
         val marks = finder.input(e, c, lastMarks)
@@ -44,27 +48,27 @@ object JumpHandler : TypedActionHandler {
     // 当按下 esc 时
     private val escActionHandler: EditorActionHandler = object : EditorActionHandler() {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-            stop()
+            stop(editor)
         }
     }
 
     // 当按下删除键时
     private val backSpaceActionHandler: EditorActionHandler = object : EditorActionHandler() {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-            stop()
+            stop(editor)
         }
     }
 
 
-    private fun jumpOrShowCanvas(e: Editor, marks: List<MarksCanvas.Mark>) {
+    private fun jumpOrShowCanvas(editor: Editor, marks: List<MarksCanvas.Mark>) {
         when {
             marks.isEmpty() -> {
-                stop()
+                stop(editor)
             }
 
             marks.size == 1 && marks[0].hintMark -> {
                 // only one found, just jump to it
-                val caret = e.caretModel.currentCaret
+                val caret = editor.caretModel.currentCaret
                 if (caret.hasSelection()) {
                     val downOffset =
                         if (caret.selectionStart == caret.offset)
@@ -74,7 +78,7 @@ object JumpHandler : TypedActionHandler {
                     caret.setSelection(downOffset, marks[0].offset)
                 }
                 // Shamelessly robbed from AceJump: https://github.com/acejump/AceJump/blob/99e0a5/src/main/kotlin/org/acejump/action/TagJumper.kt#L87
-                with(e) {
+                with(editor) {
                     project?.let { project ->
                         CommandProcessor.getInstance().executeCommand(
                             project, {
@@ -90,15 +94,15 @@ object JumpHandler : TypedActionHandler {
                 }
                 caret.moveToOffset(marks[0].offset)
 
-                stop()
+                stop(editor)
                 onJump?.invoke()
             }
 
             else -> {
                 if (!isCanvasAdded) {
-                    mMarksCanvas.sync(e)
-                    e.contentComponent.add(mMarksCanvas)
-                    e.contentComponent.repaint()
+                    mMarksCanvas.sync(editor)
+                    editor.contentComponent.add(mMarksCanvas)
+                    editor.contentComponent.repaint()
                     isCanvasAdded = true
                 }
                 mMarksCanvas.setData(marks)
@@ -124,6 +128,8 @@ object JumpHandler : TypedActionHandler {
         mOldBackSpaceActionHandler = manager.getActionHandler(IdeActions.ACTION_EDITOR_BACKSPACE)
         manager.setActionHandler(IdeActions.ACTION_EDITOR_BACKSPACE, backSpaceActionHandler)
 
+        setGrayColor(editor, true);
+
         onJump = null
         when (mode) {
             MODE_CHAR1 -> finder = Search()
@@ -141,7 +147,7 @@ object JumpHandler : TypedActionHandler {
         }
     }
 
-    private fun stop() {
+    private fun stop(editor: Editor) {
         if (isStart) {
             isStart = false
             val manager = EditorActionManager.getInstance()
@@ -158,6 +164,48 @@ object JumpHandler : TypedActionHandler {
                 parent.repaint()
             }
             isCanvasAdded = false
+            // get editor and remove the highlighters
+            setGrayColor(editor, false)
+        }
+    }
+
+    private fun setGrayColor(editor: Editor, setGray: Boolean) {
+        if (setGray) {
+            // Set gray color of all editor text
+            val visibleArea = editor.scrollingModel.visibleArea
+            val startLogicalPosition = editor.xyToLogicalPosition(visibleArea.location)
+            val endLogicalPosition = editor.xyToLogicalPosition(
+                visibleArea.location.apply {
+                    this.x += visibleArea.width
+                    this.y += visibleArea.height
+                }
+            )
+
+            val startOffset = editor.logicalPositionToOffset(startLogicalPosition)
+            val endOffset = editor.logicalPositionToOffset(endLogicalPosition)
+
+            val grayAttributes = TextAttributes().apply {
+                foregroundColor = Color.GRAY
+            }
+
+            val markupModel = editor.markupModel
+            val highlighter = markupModel.addRangeHighlighter(
+                startOffset,
+                endOffset,
+                HighlighterLayer.SELECTION - 1,
+                grayAttributes,
+                HighlighterTargetArea.EXACT_RANGE
+            )
+
+            // Store the highlighter for later removal
+            highlighters.add(highlighter)
+
+        } else {
+            val markupModel = editor.markupModel
+            // Remove each highlighter that was previously added
+            highlighters.forEach { markupModel.removeHighlighter(it) }
+            // Clear the list of highlighters after removal
+            highlighters.clear()
         }
     }
 }

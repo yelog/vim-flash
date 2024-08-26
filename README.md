@@ -34,3 +34,12 @@ Find `Settings -> Others Settings -> vim-flash` to configure the plugin.
 
   Download the [latest release](https://github.com/yelog/vim-flash/releases/latest) and install it manually using
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
+
+## Planned Features
+
+- Goto closest match when pressing enter key
+
+## References
+
+- [flash.nvim](https://github.com/folke/flash.nvim)
+- [KJump](https://github.com/a690700752/KJump)
