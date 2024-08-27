@@ -9,7 +9,7 @@ class ConfigUI {
     private lateinit var labelBgTF: JTextField
     private lateinit var labelFgTF: JTextField
     private lateinit var matchBgTF: JTextField
-//    private lateinit var matchBgOpacityTF: JTextField
+    private lateinit var matchBgOpacityTF: JTextField
 
     var characters: String?
         get() = charactersTF.text
@@ -35,15 +35,15 @@ class ConfigUI {
         set(c) {
             labelFgTF.text = Integer.toHexString(c)
         }
-//    var matchBgOpacity: Float
-//        get() = try {
-//            matchBgOpacityTF.text.toFloat()
-//        } catch (e: NumberFormatException) {
-//            0.3f
-//        }
-//        set(c) {
-//            matchBgOpacityTF.text = c.toString()
-//        }
+    var matchBgOpacity: Float
+        get() = try {
+            matchBgOpacityTF.text.toFloat()
+        } catch (e: NumberFormatException) {
+            0.3f
+        }
+        set(c) {
+            matchBgOpacityTF.text = c.toString()
+        }
     var matchBg: Int
         get() = try {
             Integer.parseUnsignedInt(matchBgTF.text, 16)

@@ -21,7 +21,7 @@ class UserConfig : PersistentStateComponent<UserConfig.DataBean> {
         var characters = DEFAULT_CHARACTERS
         var labelBg = DEFAULT_LABEL_BG_COLOR
         var labelFg = DEFAULT_LABEL_FONT_COLOR
-//        var matchBgOpacity = DEFAULT_MATCH_BG_OPACITY
+        var matchBgOpacity = DEFAULT_MATCH_BG_OPACITY
         var matchBg = DEFAULT_MATCH_BG_COLOR
     }
 

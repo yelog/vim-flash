@@ -26,9 +26,9 @@ class Configurable : Configurable {
         if (ui.labelFg == null) {
             config.labelFg = UserConfig.DEFAULT_LABEL_FONT_COLOR
         }
-//        if (ui.matchBgOpacity == null) {
-//            config.matchBgOpacity = UserConfig.DEFAULT_MATCH_BG_OPACITY
-//        }
+        if (ui.matchBgOpacity == null) {
+            config.matchBgOpacity = UserConfig.DEFAULT_MATCH_BG_OPACITY
+        }
         if (ui.matchBg == null) {
             config.matchBg = UserConfig.DEFAULT_MATCH_BG_COLOR
         }
@@ -50,6 +50,6 @@ class Configurable : Configurable {
         ui.labelBg = config.labelBg
         ui.labelFg = config.labelFg
         ui.matchBg = config.matchBg
-//        ui.matchBgOpacity = config.matchBgOpacity
+        ui.matchBgOpacity = config.matchBgOpacity
     }
 }

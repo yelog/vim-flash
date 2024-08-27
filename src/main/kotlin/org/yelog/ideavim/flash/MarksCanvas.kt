@@ -45,8 +45,7 @@ class MarksCanvas : JComponent() {
                 val keyTag = it.first.keyTag
                 val charBounds = mFontMetrics.getStringBounds("x", g).bounds
                 // draw match text background
-//                g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, config.matchBgOpacity)// 设置透明度
-                g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f)// 设置透明度
+                g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, config.matchBgOpacity)// 设置透明度
                 // 给每个查询字符挨个渲染, 防止 soft-wrap 换行
                 for (i in 0 until it.first.charLength) {
                     mEditor.offsetToXYCompat(it.first.offset + i).let { offset ->
