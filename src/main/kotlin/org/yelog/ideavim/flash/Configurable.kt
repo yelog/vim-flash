@@ -9,8 +9,7 @@ class Configurable : Configurable {
     private lateinit var ui: ConfigUI
 
     override fun isModified(): Boolean {
-        return ui.characters != config.characters || ui.hit1FontColor != config.hit1Color
-                || ui.hit2FontColors == null || ui.hit2FontColors!![0] != config.hit2Color0 || ui.hit2FontColors!![1] != config.hit2Color1 || ui.bgColor != config.backgroundColor
+        return ui.characters != config.characters || ui.labelBg != config.labelBg || ui.labelFg != config.labelFg || ui.matchBg != config.matchBg
     }
 
     override fun getDisplayName(): String {
@@ -19,18 +18,20 @@ class Configurable : Configurable {
 
     override fun apply() {
         config.characters = ui.characters.orEmpty()
-        val hit1Color = ui.hit1FontColor
-        config.hit1Color = hit1Color
-        val hit2Colors = ui.hit2FontColors
-        if (hit2Colors == null) {
-            config.hit2Color0 = UserConfig.DEFAULT_FONT_COLOR
-            config.hit2Color1 = UserConfig.DEFAULT_FONT_COLOR
-        } else {
-            config.hit2Color0 = hit2Colors[0]
-            config.hit2Color1 = hit2Colors[1]
+        config.labelFg = ui.labelFg
+        config.labelBg = ui.labelBg
+        if (ui.labelBg == null) {
+            config.labelBg = UserConfig.DEFAULT_LABEL_BG_COLOR
         }
-        val uiBgColor = ui.bgColor
-        config.backgroundColor = uiBgColor
+        if (ui.labelFg == null) {
+            config.labelFg = UserConfig.DEFAULT_LABEL_FONT_COLOR
+        }
+//        if (ui.matchBgOpacity == null) {
+//            config.matchBgOpacity = UserConfig.DEFAULT_MATCH_BG_OPACITY
+//        }
+        if (ui.matchBg == null) {
+            config.matchBg = UserConfig.DEFAULT_MATCH_BG_COLOR
+        }
     }
 
     override fun reset() {
@@ -46,8 +47,9 @@ class Configurable : Configurable {
 
     private fun fillUI() {
         ui.characters = config.characters
-        ui.hit1FontColor = config.hit1Color
-        ui.hit2FontColors = intArrayOf(config.hit2Color0, config.hit2Color1)
-        ui.bgColor = config.backgroundColor
+        ui.labelBg = config.labelBg
+        ui.labelFg = config.labelFg
+        ui.matchBg = config.matchBg
+//        ui.matchBgOpacity = config.matchBgOpacity
     }
 }

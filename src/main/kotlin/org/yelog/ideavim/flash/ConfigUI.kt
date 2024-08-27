@@ -5,11 +5,11 @@ import javax.swing.JTextField
 
 class ConfigUI {
     lateinit var rootPanel: JPanel
-    private lateinit var hit1ColorTF: JTextField
-    private lateinit var hit2ColorTF0: JTextField
-    private lateinit var hit2ColorTF1: JTextField
     private lateinit var charactersTF: JTextField
-    private lateinit var bgTF: JTextField
+    private lateinit var labelBgTF: JTextField
+    private lateinit var labelFgTF: JTextField
+    private lateinit var matchBgTF: JTextField
+//    private lateinit var matchBgOpacityTF: JTextField
 
     var characters: String?
         get() = charactersTF.text
@@ -17,39 +17,40 @@ class ConfigUI {
             charactersTF.text = s
         }
 
-    var hit1FontColor: Int
+    var labelBg: Int
         get() = try {
-            Integer.parseUnsignedInt(hit1ColorTF.text, 16)
+            Integer.parseUnsignedInt(labelBgTF.text, 16)
         } catch (e: NumberFormatException) {
             0
         }
         set(c) {
-            hit1ColorTF.text = Integer.toHexString(c)
+            labelBgTF.text = Integer.toHexString(c)
         }
-
-    var hit2FontColors: IntArray?
+    var labelFg: Int
         get() = try {
-            intArrayOf(
-                Integer.parseUnsignedInt(hit2ColorTF0.text, 16),
-                Integer.parseUnsignedInt(hit2ColorTF1.text, 16)
-            )
-        } catch (e: NumberFormatException) {
-            null
-        }
-        set(arr) {
-            arr?.let {
-                hit2ColorTF0.text = Integer.toHexString(it[0])
-                hit2ColorTF1.text = Integer.toHexString(it[1])
-            }
-        }
-
-    var bgColor: Int
-        get() = try {
-            Integer.parseUnsignedInt(bgTF.text, 16)
+            Integer.parseUnsignedInt(labelFgTF.text, 16)
         } catch (e: NumberFormatException) {
             0
         }
         set(c) {
-            bgTF.text = Integer.toHexString(c)
+            labelFgTF.text = Integer.toHexString(c)
+        }
+//    var matchBgOpacity: Float
+//        get() = try {
+//            matchBgOpacityTF.text.toFloat()
+//        } catch (e: NumberFormatException) {
+//            0.3f
+//        }
+//        set(c) {
+//            matchBgOpacityTF.text = c.toString()
+//        }
+    var matchBg: Int
+        get() = try {
+            Integer.parseUnsignedInt(matchBgTF.text, 16)
+        } catch (e: NumberFormatException) {
+            0
+        }
+        set(c) {
+            matchBgTF.text = Integer.toHexString(c)
         }
 }

@@ -19,16 +19,18 @@ class UserConfig : PersistentStateComponent<UserConfig.DataBean> {
 
     class DataBean {
         var characters = DEFAULT_CHARACTERS
-        var backgroundColor = DEFAULT_BG_COLOR
-        var hit1Color = DEFAULT_FONT_COLOR
-        var hit2Color0 = DEFAULT_FONT_COLOR
-        var hit2Color1 = DEFAULT_FONT_COLOR
+        var labelBg = DEFAULT_LABEL_BG_COLOR
+        var labelFg = DEFAULT_LABEL_FONT_COLOR
+//        var matchBgOpacity = DEFAULT_MATCH_BG_OPACITY
+        var matchBg = DEFAULT_MATCH_BG_COLOR
     }
 
     companion object {
         private const val DEFAULT_CHARACTERS = "hklyuiopnm,qwertzxcvbasdgjf;"
-        const val DEFAULT_FONT_COLOR = -0x1
-        const val DEFAULT_BG_COLOR = -0xff8534
+        const val DEFAULT_LABEL_FONT_COLOR = 0xffc8d3f5.toInt()
+        const val DEFAULT_LABEL_BG_COLOR = 0xffff007c.toInt()
+        const val DEFAULT_MATCH_BG_OPACITY = 0.3f
+        const val DEFAULT_MATCH_BG_COLOR = 0xff3e68d7.toInt()
 
         private val instance: UserConfig
             get() = ApplicationManager.getApplication().getService(UserConfig::class.java)

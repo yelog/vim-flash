@@ -41,10 +41,11 @@ class MarksCanvas : JComponent() {
         mMarks.zip(coordinates)
             .sortedBy { it.second.x }
             .forEach {
-                g2d.color = Color(config.backgroundColor, true)
+                g2d.color = Color(config.matchBg, true)
                 val keyTag = it.first.keyTag
                 val charBounds = mFontMetrics.getStringBounds("x", g).bounds
                 // draw match text background
+//                g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, config.matchBgOpacity)// 设置透明度
                 g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f)// 设置透明度
                 // 给每个查询字符挨个渲染, 防止 soft-wrap 换行
                 for (i in 0 until it.first.charLength) {
@@ -56,6 +57,7 @@ class MarksCanvas : JComponent() {
                 // 计算标记的位置
                 val markOffset = mEditor.offsetToXYCompat(it.first.offset + it.first.charLength)
 
+                g2d.color = Color(config.labelBg, true)
                 g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER)
                 val bounds = mFontMetrics.getStringBounds(keyTag.substring(it.first.advanceIndex), g).bounds
                 // draw index background
@@ -69,28 +71,17 @@ class MarksCanvas : JComponent() {
 
                 val xInCanvas = markOffset.x - x
                 val yInCanvas = markOffset.y - y + bounds.height - mFontMetrics.descent + 2
-                if (keyTag.length == 2) {
-                    if (it.first.advanceIndex == 0) {
-                        val midX = xInCanvas + bounds.width / 2
-
-                        // first char
-                        g2d.color = Color(config.hit2Color0, true)
-                        g2d.drawString(keyTag[0].toString(), xInCanvas, yInCanvas)
-
-                        // second char
-                        g2d.color = Color(config.hit2Color1, true)
-                        g2d.drawString(keyTag[1].toString(), midX, yInCanvas)
-                    } else {
-                        g2d.color = Color(config.hit2Color1, true)
-                        g2d.drawString(keyTag[1].toString(), xInCanvas, yInCanvas)
-                    }
-                } else {
-                    g2d.color = Color(config.hit1Color, true)
-                    g2d.drawString(keyTag[0].toString(), xInCanvas, yInCanvas)
-                }
+                g2d.color = Color(config.labelFg, true)
+                g2d.drawString(keyTag, xInCanvas, yInCanvas)
             }
         super.paint(g)
     }
 
-    class Mark(val keyTag: String, val offset: Int, val charLength: Int = 0, val advanceIndex: Int = 0, val hintMark: Boolean = false)
+    class Mark(
+        val keyTag: String,
+        val offset: Int,
+        val charLength: Int = 0,
+        val advanceIndex: Int = 0,
+        val hintMark: Boolean = false
+    )
 }
