@@ -14,7 +14,7 @@ interface Finder {
     /**
      * @return same with [.start]
      */
-    fun input(e: Editor, c: Char, lastMarks: List<MarksCanvas.Mark>): List<MarksCanvas.Mark>?
+    fun input(e: Editor, c: Char, lastMarks: List<MarksCanvas.Mark>, searchString: String): List<MarksCanvas.Mark>?
 
     /**
      * @return Return the marks whose start character is removed.

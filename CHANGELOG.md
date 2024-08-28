@@ -6,7 +6,11 @@
 ### Added
 - Update description
 - Support latest IntelliJ IDEA
-- Fix issue of deprecated methods 
+- Goto closest match when pressing enter key
+- Default use the color of flash.nvim
+
+### Modified
+- Fix issue of deprecated methods
 
 ## 0.0.1
 ### Added

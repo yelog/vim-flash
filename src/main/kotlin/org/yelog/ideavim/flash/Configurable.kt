@@ -9,7 +9,7 @@ class Configurable : Configurable {
     private lateinit var ui: ConfigUI
 
     override fun isModified(): Boolean {
-        return ui.characters != config.characters || ui.labelBg != config.labelBg || ui.labelFg != config.labelFg || ui.matchBg != config.matchBg
+        return ui.characters != config.characters || ui.labelFg != config.labelFg || ui.labelBg != config.labelBg || ui.matchFg != config.matchFg || ui.matchBg != config.matchBg || ui.matchNearestFg != config.matchNearestFg || ui.matchNearestBg != config.matchNearestBg
     }
 
     override fun getDisplayName(): String {
@@ -24,13 +24,19 @@ class Configurable : Configurable {
             config.labelBg = UserConfig.DEFAULT_LABEL_BG_COLOR
         }
         if (ui.labelFg == null) {
-            config.labelFg = UserConfig.DEFAULT_LABEL_FONT_COLOR
+            config.labelFg = UserConfig.DEFAULT_LABEL_FG_COLOR
         }
-        if (ui.matchBgOpacity == null) {
-            config.matchBgOpacity = UserConfig.DEFAULT_MATCH_BG_OPACITY
+        if (ui.matchFg == null) {
+            config.matchFg = UserConfig.DEFAULT_MATCH_FG_COLOR
         }
         if (ui.matchBg == null) {
             config.matchBg = UserConfig.DEFAULT_MATCH_BG_COLOR
+        }
+        if (ui.matchNearestFg == null) {
+            config.matchNearestFg = UserConfig.DEFAULT_MATCH_NEAREST_FG_COLOR
+        }
+        if (ui.matchNearestBg == null) {
+            config.matchNearestBg = UserConfig.DEFAULT_MATCH_NEAREST_BG_COLOR
         }
     }
 
@@ -47,9 +53,11 @@ class Configurable : Configurable {
 
     private fun fillUI() {
         ui.characters = config.characters
-        ui.labelBg = config.labelBg
         ui.labelFg = config.labelFg
+        ui.labelBg = config.labelBg
+        ui.matchFg = config.matchFg
         ui.matchBg = config.matchBg
-        ui.matchBgOpacity = config.matchBgOpacity
+        ui.matchNearestFg = config.matchNearestFg
+        ui.matchNearestBg = config.matchNearestBg
     }
 }

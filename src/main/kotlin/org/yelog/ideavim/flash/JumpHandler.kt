@@ -27,18 +27,22 @@ object JumpHandler : TypedActionHandler {
     private var mOldTypedHandler: TypedActionHandler? = null
     private var mOldEscActionHandler: EditorActionHandler? = null
     private var mOldBackSpaceActionHandler: EditorActionHandler? = null
+    private var mOldEnterActionHandler: EditorActionHandler? = null
     private val mMarksCanvas = MarksCanvas()
     private var isStart = false
     private lateinit var finder: Finder
     private var onJump: (() -> Unit)? = null // Runnable that is called after jump
     private var lastMarks: List<MarksCanvas.Mark> = emptyList()
     private var isCanvasAdded = false
+    // 记录当前搜索的字符串
+    private var searchString = ""
 
     // List to keep track of the added highlighters
     private val highlighters = mutableListOf<RangeHighlighter>()
 
     override fun execute(e: Editor, c: Char, dc: DataContext) {
-        val marks = finder.input(e, c, lastMarks)
+        this.searchString += c
+        val marks = finder.input(e, c, lastMarks, searchString)
         if (marks != null) {
             lastMarks = marks
             jumpOrShowCanvas(e, lastMarks)
@@ -59,8 +63,17 @@ object JumpHandler : TypedActionHandler {
         }
     }
 
+    // 当按下回车键时
+    private val enterActionHandler: EditorActionHandler = object : EditorActionHandler() {
+        override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
+            editor.caretModel.currentCaret.moveToOffset(lastMarks[0].offset)
+            stop(editor)
+            onJump?.invoke()
+        }
+    }
 
-    private fun jumpOrShowCanvas(editor: Editor, marks: List<MarksCanvas.Mark>) {
+
+    private fun jumpOrShowCanvas(editor: Editor,marks: List<MarksCanvas.Mark>) {
         when {
             marks.isEmpty() -> {
                 stop(editor)
@@ -105,7 +118,7 @@ object JumpHandler : TypedActionHandler {
                     editor.contentComponent.repaint()
                     isCanvasAdded = true
                 }
-                mMarksCanvas.setData(marks)
+                mMarksCanvas.setData(marks, this.searchString)
             }
         }
     }
@@ -117,6 +130,7 @@ object JumpHandler : TypedActionHandler {
      */
     fun start(mode: Int, anActionEvent: AnActionEvent) {
         if (isStart) return
+        this.searchString = ""
         isStart = true
         val editor = anActionEvent.getData(CommonDataKeys.EDITOR) ?: return
         val manager = EditorActionManager.getInstance()
@@ -127,6 +141,8 @@ object JumpHandler : TypedActionHandler {
         manager.setActionHandler(IdeActions.ACTION_EDITOR_ESCAPE, escActionHandler)
         mOldBackSpaceActionHandler = manager.getActionHandler(IdeActions.ACTION_EDITOR_BACKSPACE)
         manager.setActionHandler(IdeActions.ACTION_EDITOR_BACKSPACE, backSpaceActionHandler)
+        mOldEnterActionHandler = manager.getActionHandler(IdeActions.ACTION_EDITOR_ENTER)
+        manager.setActionHandler(IdeActions.ACTION_EDITOR_ENTER, enterActionHandler)
 
         setGrayColor(editor, true);
 
@@ -157,6 +173,9 @@ object JumpHandler : TypedActionHandler {
             }
             if (mOldBackSpaceActionHandler != null) {
                 manager.setActionHandler(IdeActions.ACTION_EDITOR_BACKSPACE, mOldBackSpaceActionHandler!!)
+            }
+            if (mOldEnterActionHandler != null) {
+                manager.setActionHandler(IdeActions.ACTION_EDITOR_ENTER, mOldEnterActionHandler!!)
             }
             val parent = mMarksCanvas.parent
             if (parent != null) {

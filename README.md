@@ -37,7 +37,7 @@ Find `Settings -> Others Settings -> vim-flash` to configure the plugin.
 
 ## Planned Features
 
-- Goto closest match when pressing enter key
+- From GitHub issues and PRs
 
 ## References
 

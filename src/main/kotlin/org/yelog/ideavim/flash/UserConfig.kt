@@ -19,18 +19,22 @@ class UserConfig : PersistentStateComponent<UserConfig.DataBean> {
 
     class DataBean {
         var characters = DEFAULT_CHARACTERS
+        var labelFg = DEFAULT_LABEL_FG_COLOR
         var labelBg = DEFAULT_LABEL_BG_COLOR
-        var labelFg = DEFAULT_LABEL_FONT_COLOR
-        var matchBgOpacity = DEFAULT_MATCH_BG_OPACITY
+        var matchFg = DEFAULT_MATCH_FG_COLOR
         var matchBg = DEFAULT_MATCH_BG_COLOR
+        var matchNearestFg = DEFAULT_MATCH_NEAREST_FG_COLOR
+        var matchNearestBg = DEFAULT_MATCH_NEAREST_BG_COLOR
     }
 
     companion object {
         private const val DEFAULT_CHARACTERS = "hklyuiopnm,qwertzxcvbasdgjf;"
-        const val DEFAULT_LABEL_FONT_COLOR = 0xffc8d3f5.toInt()
+        const val DEFAULT_LABEL_FG_COLOR = 0xffc8d3f5.toInt()
         const val DEFAULT_LABEL_BG_COLOR = 0xffff007c.toInt()
-        const val DEFAULT_MATCH_BG_OPACITY = 0.3f
+        const val DEFAULT_MATCH_FG_COLOR = 0xffc8d3f5.toInt()
         const val DEFAULT_MATCH_BG_COLOR = 0xff3e68d7.toInt()
+        const val DEFAULT_MATCH_NEAREST_FG_COLOR = 0xff1b1d2b.toInt()
+        const val DEFAULT_MATCH_NEAREST_BG_COLOR = 0xffff966c.toInt()
 
         private val instance: UserConfig
             get() = ApplicationManager.getApplication().getService(UserConfig::class.java)
