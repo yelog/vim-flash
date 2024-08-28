@@ -20,25 +20,10 @@ class Configurable : Configurable {
         config.characters = ui.characters.orEmpty()
         config.labelFg = ui.labelFg
         config.labelBg = ui.labelBg
-        if (ui.labelBg == null) {
-            config.labelBg = UserConfig.DEFAULT_LABEL_BG_COLOR
-        }
-        if (ui.labelFg == null) {
-            config.labelFg = UserConfig.DEFAULT_LABEL_FG_COLOR
-        }
-        if (ui.matchFg == null) {
-            config.matchFg = UserConfig.DEFAULT_MATCH_FG_COLOR
-        }
-        if (ui.matchBg == null) {
-            config.matchBg = UserConfig.DEFAULT_MATCH_BG_COLOR
-        }
-        if (ui.matchNearestFg == null) {
-            config.matchNearestFg = UserConfig.DEFAULT_MATCH_NEAREST_FG_COLOR
-        }
-        if (ui.matchNearestBg == null) {
-            config.matchNearestBg = UserConfig.DEFAULT_MATCH_NEAREST_BG_COLOR
-        }
-    }
+        config.matchFg = ui.matchFg
+        config.matchBg = ui.matchBg
+        config.matchNearestFg = ui.matchNearestFg
+        config.matchNearestBg = ui.matchNearestBg}
 
     override fun reset() {
         fillUI()
