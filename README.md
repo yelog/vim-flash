@@ -6,7 +6,8 @@
 
 <h2>Like <a href="https://github.com/folke/flash.nvim">flash.nvim</a> on IdeaVim</h2>
 
-![vim-flash](https://github.com/user-attachments/assets/81c20618-6974-4e96-b199-016061536156)
+![ideavim-flash](https://github.com/user-attachments/assets/acd88f0a-d628-40ef-89e3-53ccbd3a676a)
+
 
 ## Usage
 
