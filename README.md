@@ -20,7 +20,9 @@ You can use other keybindings. for example <code>nmap <leader>s :action flash.se
 Find `Settings -> Others Settings -> vim-flash` to configure the plugin.
 
 1. Characters: This This is the sequence of letters used in order of proximity from nearest to farthest between the match and the current cursor.
-2. Background color: This is the Background color of the match
+2. Label color: The first input box is the color of label text, and the second input box is the color of label background.
+3. Match color: The first input box is the color of match text, and the second input box is the color of match background.
+4. Match nearest color: The first input box is the color of match nearest text, and the second input box is the color of match nearest background.
 
 
 ## Installation

@@ -30,7 +30,9 @@
         <ul>
           <li>1. Characters: This This is the sequence of letters used in order of proximity from nearest to farthest between
             the match and the current cursor.</li>
-          <li>2. Background color: This is the Background color of the match</li>
+          <li>2. Label color: The first input box is the color of label text, and the second input box is the color of label background.</li>
+          <li>3. Match color: The first input box is the color of match text, and the second input box is the color of match background.</li>
+          <li>3. Match nearest color: The first input box is the color of match nearest text, and the second input box is the color of match nearest background.</li>
         </ul>
         </p>
 
@@ -41,11 +43,11 @@
     ]]></description>
 
     <change-notes><![CDATA[
-        <h2>0.0.2</h2>
+        <h2>0.0.3</h2>
         <ul>
             <li>Update description</li>
-            <li>Support latest IntelliJ IDEA</li>
-            <li>Fix issue of deprecated methods </li>
+            <li>Goto closest match when pressing enter key</li>
+            <li></li>
         </ul>
         <h2>0.0.1</h2>
         <ul>

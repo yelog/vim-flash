@@ -3,11 +3,13 @@
 # vim-flash Changelog
 
 ## 0.0.2
+- Goto closest match when pressing enter key
+- Default use the color of flash.nvim
+
+## 0.0.2
 ### Added
 - Update description
 - Support latest IntelliJ IDEA
-- Goto closest match when pressing enter key
-- Default use the color of flash.nvim
 
 ### Modified
 - Fix issue of deprecated methods
