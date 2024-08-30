@@ -11,11 +11,11 @@
 
 ## Usage
 
-Add `nmap s :action flash.search<cr>` to your `.ideavimrc` file.
+Add `nmap s <Action>(flash.search)` to your `.ideavimrc` file.
 
 Then you can use `s` and type the word you want to search for. The word will be highlighted in the editor.
 
-You can use other keybindings. for example <code>nmap <leader>s :action flash.search<cr></code>
+You can use other keybindings. for example <code>nmap <leader>s <Action>(flash.search)</code>
 
 ## Configuration
 Find `Settings -> Others Settings -> vim-flash` to configure the plugin.
