@@ -1,8 +1,8 @@
 # vim-flash
 
 ![Build](https://github.com/yelog/vim-flash/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
+[![Version](https://img.shields.io/jetbrains/plugin/v/25101-vim-flash)](https://plugins.jetbrains.com/plugin/25101-vim-flash)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/25101-vim-flash)](https://plugins.jetbrains.com/plugin/25101-vim-flash)
 
 <h2>Like <a href="https://github.com/folke/flash.nvim">flash.nvim</a> on IdeaVim</h2>
 
