@@ -18,7 +18,7 @@ abstract class BaseAction : DumbAwareAction() {
     abstract fun getMode(): Int
 
     override fun getActionUpdateThread(): ActionUpdateThread {
-        // 根据需要选择合适的线程类型，EDT 通常用于更新 UI 相关的操作
+        // Select the appropriate thread type as needed; EDT is typically used for UI-related operations.
         return ActionUpdateThread.EDT
     }
 }

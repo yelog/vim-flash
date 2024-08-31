@@ -10,10 +10,10 @@ import kotlin.math.abs
 
 
 class Search : Finder {
-    // 记录当前可视区域的字符串
+    // Record the string of the current visible area
     private lateinit var visibleString: String
 
-    // 记录可视区域的相对文档开头的位置
+    // Record the position of the visible area relative to the beginning of the document
     private lateinit var visibleRange: TextRange
 
     override fun start(e: Editor, visibleString: String, visibleRange: TextRange): List<MarksCanvas.Mark>? {

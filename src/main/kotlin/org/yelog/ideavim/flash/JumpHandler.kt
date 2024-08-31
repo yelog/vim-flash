@@ -34,7 +34,7 @@ object JumpHandler : TypedActionHandler {
     private var onJump: (() -> Unit)? = null // Runnable that is called after jump
     private var lastMarks: List<MarksCanvas.Mark> = emptyList()
     private var isCanvasAdded = false
-    // 记录当前搜索的字符串
+    // Record the string being currently searched
     private var searchString = ""
 
     // List to keep track of the added highlighters
@@ -49,21 +49,21 @@ object JumpHandler : TypedActionHandler {
         }
     }
 
-    // 当按下 esc 时
+    // When the Escape key is pressed
     private val escActionHandler: EditorActionHandler = object : EditorActionHandler() {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
             stop(editor)
         }
     }
 
-    // 当按下删除键时
+    // When the Delete key is pressed
     private val backSpaceActionHandler: EditorActionHandler = object : EditorActionHandler() {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
             stop(editor)
         }
     }
 
-    // 当按下回车键时
+    // When the Enter key is pressed
     private val enterActionHandler: EditorActionHandler = object : EditorActionHandler() {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
             editor.caretModel.currentCaret.moveToOffset(lastMarks[0].offset)

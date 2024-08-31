@@ -37,7 +37,7 @@ class MarksCanvas : JComponent() {
         )
         g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER)
 
-        // 计算开始坐标的位置, 用于给所有坐标做排序
+        // Calculate the starting coordinate position, used for sorting all coordinates
         val coordinates = mMarks
             .map { mEditor.offsetToXYCompat(it.offset) }
             .toList()
@@ -49,10 +49,10 @@ class MarksCanvas : JComponent() {
                 val charBounds = mFontMetrics.getStringBounds("x", g).bounds
                 val bounds = mFontMetrics.getStringBounds(keyTag.substring(it.first.advanceIndex), g).bounds
                 // draw match text background
-                // 给每个查询字符挨个渲染, 防止 soft-wrap 换行
+                // Render each query character individually to prevent soft-wrap line breaks
                 for (i in 0 until it.first.charLength) {
                     mEditor.offsetToXYCompat(it.first.offset + i).let { offset ->
-                        // 获取 offset 所在的字符
+                        // Get the character at the specified offset
                         val document = mEditor.document
                         val offsetTotal = it.first.offset + i
                         val charAtOffset = if (offsetTotal in 0 until document.textLength) {
@@ -62,7 +62,7 @@ class MarksCanvas : JComponent() {
                         }
                         var fg: Int
                         var bg: Int
-                        // 如果是循环的第一个
+                        // If it is the first iteration of the loop
                         if (mMarks[0].offset == it.first.offset) {
                             g2d.color = Color(config.matchNearestBg, true)
                             fg = config.matchNearestFg
@@ -83,7 +83,7 @@ class MarksCanvas : JComponent() {
                 }
 
                 g2d.color = Color(config.labelBg, true)
-                // 计算标记的位置
+                // Calculate the position of the marker
                 val markOffset = mEditor.offsetToXYCompat(it.first.offset + it.first.charLength)
                 // draw index background
                 g2d.fillRect(
