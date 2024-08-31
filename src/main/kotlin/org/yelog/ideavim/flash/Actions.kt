@@ -1,5 +1,6 @@
 package org.yelog.ideavim.flash
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.project.DumbAwareAction
@@ -15,6 +16,11 @@ abstract class BaseAction : DumbAwareAction() {
     }
 
     abstract fun getMode(): Int
+
+    override fun getActionUpdateThread(): ActionUpdateThread {
+        // 根据需要选择合适的线程类型，EDT 通常用于更新 UI 相关的操作
+        return ActionUpdateThread.EDT
+    }
 }
 
 class SearchAction : BaseAction() {
