@@ -47,7 +47,7 @@ class MarksCanvas : JComponent() {
             .forEach {
                 val keyTag = it.first.keyTag
                 val charBounds = mFontMetrics.getStringBounds("x", g).bounds
-                val bounds = mFontMetrics.getStringBounds(keyTag.substring(it.first.advanceIndex), g).bounds
+                val bounds = mFontMetrics.getStringBounds(keyTag, g).bounds
                 // draw match text background
                 // Render each query character individually to prevent soft-wrap line breaks
                 for (i in 0 until it.first.charLength) {
@@ -60,8 +60,8 @@ class MarksCanvas : JComponent() {
                         } else {
                             ' '
                         }
-                        var fg: Int
-                        var bg: Int
+                        val fg: Int
+                        val bg: Int
                         // If it is the first iteration of the loop
                         if (mMarks[0].offset == it.first.offset) {
                             g2d.color = Color(config.matchNearestBg, true)
@@ -77,25 +77,54 @@ class MarksCanvas : JComponent() {
                         g2d.drawString(
                             charAtOffset.toString(),
                             offset.x - x,
-                            offset.y - y + bounds.height - mFontMetrics.descent + 2
+                            offset.y - y + charBounds.height - mFontMetrics.descent + 2
                         )
                     }
                 }
 
+                // already hit
+                if (it.first.advanceIndex > 0) {
+                    // Calculate the position of the marker
+                    val markOffset = mEditor.offsetToXYCompat(it.first.offset + it.first.charLength)
+                    val xInCanvas = markOffset.x - x
+                    val yInCanvas = markOffset.y - y + charBounds.height - mFontMetrics.descent + 2
+                    val chosenTags = keyTag.substring(0, it.first.advanceIndex)
+                    g2d.color = Color(config.labelHitBg, true)
+                    // draw index background
+                    g2d.fillRect(
+                        markOffset.x - x,
+                        markOffset.y - y,
+                        mFontMetrics.getStringBounds(chosenTags, g).bounds.width,
+                        bounds.height
+                    )
+                    g2d.color = Color(config.labelHitFg, true)
+                    g2d.drawString(
+                        chosenTags,
+                        xInCanvas,
+                        yInCanvas
+                    )
+                }
+                // wait to hit
+                val markOffset = mEditor.offsetToXYCompat(it.first.offset + it.first.charLength + it.first.advanceIndex)
+                val xInCanvas = markOffset.x - x
+                val yInCanvas = markOffset.y - y + charBounds.height - mFontMetrics.descent + 2
+                // remain tags
+                val remainTags = keyTag.substring(it.first.advanceIndex)
+
                 g2d.color = Color(config.labelBg, true)
-                // Calculate the position of the marker
-                val markOffset = mEditor.offsetToXYCompat(it.first.offset + it.first.charLength)
                 // draw index background
                 g2d.fillRect(
-                    markOffset.x - x,
+                    xInCanvas,
                     markOffset.y - y,
-                    bounds.width,
+                    mFontMetrics.getStringBounds(remainTags, g).bounds.width,
                     bounds.height
                 )
-                val xInCanvas = markOffset.x - x
-                val yInCanvas = markOffset.y - y + bounds.height - mFontMetrics.descent + 2
                 g2d.color = Color(config.labelFg, true)
-                g2d.drawString(keyTag, xInCanvas, yInCanvas)
+                g2d.drawString(
+                    remainTags,
+                    xInCanvas,
+                    yInCanvas
+                )
             }
         super.paint(g)
     }

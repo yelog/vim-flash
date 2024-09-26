@@ -8,6 +8,8 @@ class ConfigUI {
     private lateinit var charactersTF: JTextField
     private lateinit var labelFgTF: JTextField
     private lateinit var labelBgTF: JTextField
+    private lateinit var labelHitFgTF: JTextField
+    private lateinit var labelHitBgTF: JTextField
     private lateinit var matchFgTF: JTextField
     private lateinit var matchBgTF: JTextField
     private lateinit var matchNearestFgTF: JTextField
@@ -19,6 +21,15 @@ class ConfigUI {
             charactersTF.text = s
         }
 
+    var labelFg: Int
+        get() = try {
+            Integer.parseUnsignedInt(labelFgTF.text, 16)
+        } catch (e: NumberFormatException) {
+            0
+        }
+        set(c) {
+            labelFgTF.text = Integer.toHexString(c)
+        }
     var labelBg: Int
         get() = try {
             Integer.parseUnsignedInt(labelBgTF.text, 16)
@@ -28,14 +39,23 @@ class ConfigUI {
         set(c) {
             labelBgTF.text = Integer.toHexString(c)
         }
-    var labelFg: Int
+    var labelHitFg: Int
         get() = try {
-            Integer.parseUnsignedInt(labelFgTF.text, 16)
+            Integer.parseUnsignedInt(labelHitFgTF.text, 16)
         } catch (e: NumberFormatException) {
             0
         }
         set(c) {
-            labelFgTF.text = Integer.toHexString(c)
+            labelHitFgTF.text = Integer.toHexString(c)
+        }
+    var labelHitBg: Int
+        get() = try {
+            Integer.parseUnsignedInt(labelHitBgTF.text, 16)
+        } catch (e: NumberFormatException) {
+            0
+        }
+        set(c) {
+            labelHitBgTF.text = Integer.toHexString(c)
         }
     var matchFg: Int
         get() = try {

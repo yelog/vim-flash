@@ -21,6 +21,8 @@ class UserConfig : PersistentStateComponent<UserConfig.DataBean> {
         var characters = DEFAULT_CHARACTERS
         var labelFg = DEFAULT_LABEL_FG_COLOR
         var labelBg = DEFAULT_LABEL_BG_COLOR
+        var labelHitFg = DEFAULT_LABEL_HIT_FG_COLOR
+        var labelHitBg = DEFAULT_LABEL_HIT_BG_COLOR
         var matchFg = DEFAULT_MATCH_FG_COLOR
         var matchBg = DEFAULT_MATCH_BG_COLOR
         var matchNearestFg = DEFAULT_MATCH_NEAREST_FG_COLOR
@@ -31,6 +33,8 @@ class UserConfig : PersistentStateComponent<UserConfig.DataBean> {
         private const val DEFAULT_CHARACTERS = "hklyuiopnm,qwertzxcvbasdgjf;"
         const val DEFAULT_LABEL_FG_COLOR = 0xffc8d3f5.toInt()
         const val DEFAULT_LABEL_BG_COLOR = 0xffff007c.toInt()
+        const val DEFAULT_LABEL_HIT_FG_COLOR = 0xff808080.toInt()
+        const val DEFAULT_LABEL_HIT_BG_COLOR = 0xffff007c.toInt()
         const val DEFAULT_MATCH_FG_COLOR = 0xffc8d3f5.toInt()
         const val DEFAULT_MATCH_BG_COLOR = 0xff3e68d7.toInt()
         const val DEFAULT_MATCH_NEAREST_FG_COLOR = 0xff1b1d2b.toInt()
