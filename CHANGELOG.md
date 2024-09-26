@@ -2,7 +2,11 @@
 
 # vim-flash Changelog
 
-## 0.0.2
+## 0.0.4
+- fix [issues#27](https://github.com/yelog/vim-flash/issues/27)
+- fix [issues#30](https://github.com/yelog/vim-flash/issues/30)
+
+## 0.0.3
 - Goto closest match when pressing enter key
 - Default use the color of flash.nvim
 
