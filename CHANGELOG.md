@@ -2,6 +2,10 @@
 
 # vim-flash Changelog
 
+## 0.0.5
+- fix [issues#39](https://github.com/yelog/vim-flash/issues/39)
+- fix [issues#40](https://github.com/yelog/vim-flash/issues/40)
+
 ## 0.0.4
 - fix [issues#27](https://github.com/yelog/vim-flash/issues/27)
 - fix [issues#30](https://github.com/yelog/vim-flash/issues/30)

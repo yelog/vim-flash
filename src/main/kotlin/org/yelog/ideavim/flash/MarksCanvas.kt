@@ -7,7 +7,7 @@ import java.awt.*
 import javax.swing.JComponent
 
 class MarksCanvas : JComponent() {
-    private val config: UserConfig.DataBean = UserConfig.getDataBean()
+    private val config: UserConfig.DataBean by lazy { UserConfig.getDataBean() }
     private var mMarks: List<Mark> = emptyList()
     private lateinit var mEditor: Editor
     private lateinit var mFont: Font

@@ -40,11 +40,13 @@ class UserConfig : PersistentStateComponent<UserConfig.DataBean> {
         const val DEFAULT_MATCH_NEAREST_FG_COLOR = 0xff1b1d2b.toInt()
         const val DEFAULT_MATCH_NEAREST_BG_COLOR = 0xffff966c.toInt()
 
-        private val instance: UserConfig
-            get() = ApplicationManager.getApplication().getService(UserConfig::class.java)
+        // get instance
+        private fun getInstance(): UserConfig {
+            return ApplicationManager.getApplication().getService(UserConfig::class.java)
+        }
 
         fun getDataBean(): DataBean {
-            return instance.dataBean
+            return getInstance().dataBean
         }
     }
 }

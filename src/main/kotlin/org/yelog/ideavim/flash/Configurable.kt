@@ -5,7 +5,7 @@ import org.yelog.ideavim.flash.UserConfig.DataBean
 import javax.swing.JComponent
 
 class Configurable : Configurable {
-    private lateinit var config: DataBean
+    private val config: DataBean by lazy { UserConfig.getDataBean() }
     private lateinit var ui: ConfigUI
 
     override fun isModified(): Boolean {
@@ -33,7 +33,6 @@ class Configurable : Configurable {
     }
 
     override fun createComponent(): JComponent {
-        config = UserConfig.getDataBean()
         ui = ConfigUI()
         fillUI()
         return ui.rootPanel
