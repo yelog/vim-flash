@@ -2,6 +2,10 @@
 
 # vim-flash Changelog
 
+## 0.0.6
+
+- merge [pull#56](https://github.com/yelog/vim-flash/pull/56)
+
 ## 0.0.5
 - fix [issues#39](https://github.com/yelog/vim-flash/issues/39)
 - fix [issues#40](https://github.com/yelog/vim-flash/issues/40)
@@ -15,15 +19,20 @@
 - Default use the color of flash.nvim
 
 ## 0.0.2
+
 ### Added
+
 - Update description
 - Support latest IntelliJ IDEA
 
 ### Modified
+
 - Fix issue of deprecated methods
 
 ## 0.0.1
+
 ### Added
+
 - Basic functionality
 
 ## [Unreleased]

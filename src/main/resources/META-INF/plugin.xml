@@ -43,6 +43,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <h2>0.0.6</h2>
+        <ul>
+            <li>merge [pull#56](https://github.com/yelog/vim-flash/pull/56)</li>
+        </ul>
         <h2>0.0.5</h2>
         <ul>
             <li>fix [issues#39](https://github.com/yelog/vim-flash/issues/39)</li>
