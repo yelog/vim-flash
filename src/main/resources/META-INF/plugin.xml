@@ -16,7 +16,11 @@
 
         <h2>Usage</h2>
         <p>
-          Add <code>map s <Action>(flash.search)</code> to your <code>.ideavimrc</code> file.
+          Add the following code to your <code>.ideavimrc</code> file.
+          <pre>
+nmap s <Action>(flash.search)
+xmap s <Action>(flash.search)
+          </pre>
           <br>
           Then you can use <code>s</code> and type the word you want to search for. The word will be highlighted in the editor.
           <br>
