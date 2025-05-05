@@ -2,17 +2,21 @@
 
 # vim-flash Changelog
 
+## 0.0.7
+
+- Ensured compatibility with the upcoming IDE version (252)
+
 ## 0.0.6
 
-- merge [pull#56](https://github.com/yelog/vim-flash/pull/56)
+- Merge [pull#56](https://github.com/yelog/vim-flash/pull/56)
 
 ## 0.0.5
-- fix [issues#39](https://github.com/yelog/vim-flash/issues/39)
-- fix [issues#40](https://github.com/yelog/vim-flash/issues/40)
+- Fix [issues#39](https://github.com/yelog/vim-flash/issues/39)
+- Fix [issues#40](https://github.com/yelog/vim-flash/issues/40)
 
 ## 0.0.4
-- fix [issues#27](https://github.com/yelog/vim-flash/issues/27)
-- fix [issues#30](https://github.com/yelog/vim-flash/issues/30)
+- Fix [issues#27](https://github.com/yelog/vim-flash/issues/27)
+- Fix [issues#30](https://github.com/yelog/vim-flash/issues/30)
 
 ## 0.0.3
 - Goto closest match when pressing enter key

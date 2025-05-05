@@ -47,19 +47,23 @@ xmap s <Action>(flash.search)
     ]]></description>
 
     <change-notes><![CDATA[
+        <h2>0.0.7</h2>
+        <ul>
+            <li>Ensured compatibility with the upcoming IDE version (252)</li>
+        </ul>
         <h2>0.0.6</h2>
         <ul>
-            <li>merge [pull#56](https://github.com/yelog/vim-flash/pull/56)</li>
+            <li>Merge [pull#56](https://github.com/yelog/vim-flash/pull/56)</li>
         </ul>
         <h2>0.0.5</h2>
         <ul>
-            <li>fix [issues#39](https://github.com/yelog/vim-flash/issues/39)</li>
-            <li>fix [issues#40](https://github.com/yelog/vim-flash/issues/40)</li>
+            <li>Fix [issues#39](https://github.com/yelog/vim-flash/issues/39)</li>
+            <li>Fix [issues#40](https://github.com/yelog/vim-flash/issues/40)</li>
         </ul>
         <h2>0.0.4</h2>
         <ul>
-            <li>fix [issues#27](https://github.com/yelog/vim-flash/issues/27)</li>
-            <li>fix [issues#30](https://github.com/yelog/vim-flash/issues/30)</li>
+            <li>Fix [issues#27](https://github.com/yelog/vim-flash/issues/27)</li>
+            <li>Fix [issues#30](https://github.com/yelog/vim-flash/issues/30)</li>
         </ul>
         <h2>0.0.3</h2>
         <ul>
