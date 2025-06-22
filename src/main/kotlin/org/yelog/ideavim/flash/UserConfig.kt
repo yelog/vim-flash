@@ -27,6 +27,7 @@ class UserConfig : PersistentStateComponent<UserConfig.DataBean> {
         var matchBg = DEFAULT_MATCH_BG_COLOR
         var matchNearestFg = DEFAULT_MATCH_NEAREST_FG_COLOR
         var matchNearestBg = DEFAULT_MATCH_NEAREST_BG_COLOR
+        var labelBeforeMatch = DEFAULT_LABEL_POSITION_BEFORE
     }
 
     companion object {
@@ -39,6 +40,7 @@ class UserConfig : PersistentStateComponent<UserConfig.DataBean> {
         const val DEFAULT_MATCH_BG_COLOR = 0xff3e68d7.toInt()
         const val DEFAULT_MATCH_NEAREST_FG_COLOR = 0xff1b1d2b.toInt()
         const val DEFAULT_MATCH_NEAREST_BG_COLOR = 0xffff966c.toInt()
+        const val DEFAULT_LABEL_POSITION_BEFORE = false
 
         // get instance
         private fun getInstance(): UserConfig {

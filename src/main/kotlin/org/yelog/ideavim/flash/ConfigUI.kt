@@ -14,6 +14,7 @@ class ConfigUI {
     private lateinit var matchBgTF: JTextField
     private lateinit var matchNearestFgTF: JTextField
     private lateinit var matchNearestBgTF: JTextField
+    private lateinit var labelBeforeMatchCB: javax.swing.JCheckBox // Added for form binding
 
     var characters: String?
         get() = charactersTF.text
@@ -92,5 +93,14 @@ class ConfigUI {
         }
         set(c) {
             matchNearestBgTF.text = Integer.toHexString(c)
+        }
+    var labelBeforeMatch: Boolean
+        get() = try {
+            labelBeforeMatchCB.isSelected
+        } catch (e: Exception) {
+            false
+        }
+        set(b) {
+            labelBeforeMatchCB.isSelected = b
         }
 }

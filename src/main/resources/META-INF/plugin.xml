@@ -47,6 +47,10 @@ xmap s <Action>(flash.search)
     ]]></description>
 
     <change-notes><![CDATA[
+        <h2>0.0.8</h2>
+        <ul>
+            <li>Support showing tags in front of the match, can be modified in the settings panel</li>
+        </ul>
         <h2>0.0.7</h2>
         <ul>
             <li>Ensured compatibility with the upcoming IDE version (252)</li>

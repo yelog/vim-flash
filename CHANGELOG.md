@@ -2,6 +2,10 @@
 
 # vim-flash Changelog
 
+## 0.0.8
+
+- Support showing tags in front of the match, can be modified in the settings panel
+
 ## 0.0.7
 
 - Ensured compatibility with the upcoming IDE version (252)
