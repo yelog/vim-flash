@@ -9,7 +9,7 @@ class Configurable : Configurable {
     private lateinit var ui: ConfigUI
 
     override fun isModified(): Boolean {
-        return ui.characters != config.characters || ui.labelFg != config.labelFg || ui.labelBg != config.labelBg || ui.labelHitFg != config.labelHitFg || ui.labelHitBg != config.labelHitBg || ui.matchFg != config.matchFg || ui.matchBg != config.matchBg || ui.matchNearestFg != config.matchNearestFg || ui.matchNearestBg != config.matchNearestBg || ui.labelBeforeMatch != config.labelBeforeMatch
+        return ui.characters != config.characters || ui.labelFg != config.labelFg || ui.labelBg != config.labelBg || ui.labelHitFg != config.labelHitFg || ui.labelHitBg != config.labelHitBg || ui.matchFg != config.matchFg || ui.matchBg != config.matchBg || ui.matchNearestFg != config.matchNearestFg || ui.matchNearestBg != config.matchNearestBg || ui.labelBeforeMatch != config.labelBeforeMatch || ui.autoJumpWhenSingle != config.autoJumpWhenSingle
     }
 
     override fun getDisplayName(): String {
@@ -27,6 +27,7 @@ class Configurable : Configurable {
         config.matchNearestFg = ui.matchNearestFg
         config.matchNearestBg = ui.matchNearestBg
         config.labelBeforeMatch = ui.labelBeforeMatch
+        config.autoJumpWhenSingle = ui.autoJumpWhenSingle
     }
 
     override fun reset() {
@@ -50,5 +51,6 @@ class Configurable : Configurable {
         ui.matchNearestFg = config.matchNearestFg
         ui.matchNearestBg = config.matchNearestBg
         ui.labelBeforeMatch = config.labelBeforeMatch
+        ui.autoJumpWhenSingle = config.autoJumpWhenSingle
     }
 }

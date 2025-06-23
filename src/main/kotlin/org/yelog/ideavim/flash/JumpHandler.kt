@@ -21,6 +21,7 @@ import java.awt.Color
 
 
 object JumpHandler : TypedActionHandler {
+    private val config: UserConfig.DataBean by lazy { UserConfig.getDataBean() }
     const val MODE_CHAR1 = 0
     const val MODE_CHAR2 = 1
 
@@ -79,8 +80,7 @@ object JumpHandler : TypedActionHandler {
                 stop(editor)
             }
 
-            marks.size == 1 && marks[0].hintMark -> {
-                // only one found, just jump to it
+            (marks.size == 1 && (config.autoJumpWhenSingle || marks[0].hintMark)) -> {
                 val caret = editor.caretModel.currentCaret
                 if (caret.hasSelection()) {
                     val downOffset =

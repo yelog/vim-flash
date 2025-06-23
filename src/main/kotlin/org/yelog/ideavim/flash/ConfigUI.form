@@ -242,6 +242,23 @@
               <text value="Show label before match"/>
             </properties>
           </component>
+          <component id="autoJumpWhenSingleLabel" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="7" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Auto Jump:"/>
+            </properties>
+          </component>
+          <component id="autoJumpWhenSingle" class="javax.swing.JCheckBox" binding="autoJumpWhenSingleCB">
+            <constraints>
+              <grid row="7" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Auto jump when only one match"/>
+              <selected value="false"/>
+            </properties>
+          </component>
         </children>
       </grid>
     </children>

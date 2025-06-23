@@ -15,6 +15,7 @@ class ConfigUI {
     private lateinit var matchNearestFgTF: JTextField
     private lateinit var matchNearestBgTF: JTextField
     private lateinit var labelBeforeMatchCB: javax.swing.JCheckBox // Added for form binding
+    private lateinit var autoJumpWhenSingleCB: javax.swing.JCheckBox // Added for form binding
 
     var characters: String?
         get() = charactersTF.text
@@ -102,5 +103,15 @@ class ConfigUI {
         }
         set(b) {
             labelBeforeMatchCB.isSelected = b
+        }
+
+    var autoJumpWhenSingle: Boolean
+        get() = try {
+            autoJumpWhenSingleCB.isSelected
+        } catch (e: Exception) {
+            false
+        }
+        set(b) {
+            autoJumpWhenSingleCB.isSelected = b
         }
 }
