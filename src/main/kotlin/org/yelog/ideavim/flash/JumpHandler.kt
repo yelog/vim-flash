@@ -16,6 +16,7 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import org.yelog.ideavim.flash.action.Finder
 import org.yelog.ideavim.flash.action.Search
+import org.yelog.ideavim.flash.action.VimF
 import org.yelog.ideavim.flash.utils.getVisibleRangeOffset
 import java.awt.Color
 
@@ -24,6 +25,7 @@ object JumpHandler : TypedActionHandler {
     private val config: UserConfig.DataBean by lazy { UserConfig.getDataBean() }
     const val MODE_CHAR1 = 0
     const val MODE_CHAR2 = 1
+    const val MODE_VIM_F = 2
 
     private var mOldTypedHandler: TypedActionHandler? = null
     private var mOldEscActionHandler: EditorActionHandler? = null
@@ -32,6 +34,7 @@ object JumpHandler : TypedActionHandler {
     private val mMarksCanvas = MarksCanvas()
     private var isStart = false
     private lateinit var finder: Finder
+    private var currentMode = MODE_CHAR1
     private var onJump: (() -> Unit)? = null // Runnable that is called after jump
     private var lastMarks: List<MarksCanvas.Mark> = emptyList()
     private var isCanvasAdded = false
@@ -81,6 +84,12 @@ object JumpHandler : TypedActionHandler {
             }
 
             (marks.size == 1 && (config.autoJumpWhenSingle || marks[0].hintMark)) -> {
+                // For VimF mode, don't stop automatically - keep waiting for 'f' key
+                if (currentMode == MODE_VIM_F) {
+                    // The VimF already jumped to the position, just keep search active
+                    return
+                }
+                
                 val caret = editor.caretModel.currentCaret
                 if (caret.hasSelection()) {
                     val downOffset =
@@ -131,6 +140,7 @@ object JumpHandler : TypedActionHandler {
     fun start(mode: Int, anActionEvent: AnActionEvent) {
         if (isStart) return
         this.searchString = ""
+        this.currentMode = mode
         isStart = true
         val editor = anActionEvent.getData(CommonDataKeys.EDITOR) ?: return
         val manager = EditorActionManager.getInstance()
@@ -144,12 +154,13 @@ object JumpHandler : TypedActionHandler {
         mOldEnterActionHandler = manager.getActionHandler(IdeActions.ACTION_EDITOR_ENTER)
         manager.setActionHandler(IdeActions.ACTION_EDITOR_ENTER, enterActionHandler)
 
-        setGrayColor(editor, true);
+        setGrayColor(editor, true, mode);
 
         onJump = null
         when (mode) {
             MODE_CHAR1 -> finder = Search()
             MODE_CHAR2 -> finder = Search()
+            MODE_VIM_F -> finder = VimF()
             else -> throw RuntimeException("Invalid start mode: $mode")
         }
         val visibleBorderOffset = editor.getVisibleRangeOffset()
@@ -183,41 +194,67 @@ object JumpHandler : TypedActionHandler {
                 parent.repaint()
             }
             isCanvasAdded = false
-            // get editor and remove the highlighters
-            setGrayColor(editor, false)
+            // Clean up finder-specific resources like highlighters
+            if (::finder.isInitialized) {
+                finder.cleanup(editor)
+            }
+            // get editor and remove the gray highlighters
+            setGrayColor(editor, false, MODE_CHAR1)
         }
     }
 
-    private fun setGrayColor(editor: Editor, setGray: Boolean) {
+    private fun setGrayColor(editor: Editor, setGray: Boolean, mode: Int = MODE_CHAR1) {
         if (setGray) {
-            // Set gray color of all editor text
-            val visibleArea = editor.scrollingModel.visibleArea
-            val startLogicalPosition = editor.xyToLogicalPosition(visibleArea.location)
-            val endLogicalPosition = editor.xyToLogicalPosition(
-                visibleArea.location.apply {
-                    this.x += visibleArea.width
-                    this.y += visibleArea.height
-                }
-            )
-
-            val startOffset = editor.logicalPositionToOffset(startLogicalPosition)
-            val endOffset = editor.logicalPositionToOffset(endLogicalPosition)
-
-            val grayAttributes = TextAttributes().apply {
-                foregroundColor = Color.GRAY
+            // Set gray color of text
+            val startOffset: Int
+            val endOffset: Int
+            
+            if (mode == MODE_VIM_F) {
+                // For vim f mode, gray out text after cursor
+                val cursorOffset = editor.caretModel.offset
+                val visibleArea = editor.scrollingModel.visibleArea
+                val visibleEndLogicalPosition = editor.xyToLogicalPosition(
+                    visibleArea.location.apply {
+                        this.x += visibleArea.width
+                        this.y += visibleArea.height
+                    }
+                )
+                val visibleEndOffset = editor.logicalPositionToOffset(visibleEndLogicalPosition)
+                
+                // Start from cursor position, end at visible area end or document end
+                startOffset = cursorOffset
+                endOffset = minOf(visibleEndOffset, editor.document.textLength)
+            } else {
+                // For search modes, gray out all visible text
+                val visibleArea = editor.scrollingModel.visibleArea
+                val startLogicalPosition = editor.xyToLogicalPosition(visibleArea.location)
+                val endLogicalPosition = editor.xyToLogicalPosition(
+                    visibleArea.location.apply {
+                        this.x += visibleArea.width
+                        this.y += visibleArea.height
+                    }
+                )
+                startOffset = editor.logicalPositionToOffset(startLogicalPosition)
+                endOffset = editor.logicalPositionToOffset(endLogicalPosition)
             }
 
-            val markupModel = editor.markupModel
-            val highlighter = markupModel.addRangeHighlighter(
-                startOffset,
-                endOffset,
-                HighlighterLayer.SELECTION - 1,
-                grayAttributes,
-                HighlighterTargetArea.EXACT_RANGE
-            )
+            if (startOffset < endOffset) {
+                val grayAttributes = TextAttributes().apply {
+                    foregroundColor = Color.GRAY
+                }
 
-            // Store the highlighter for later removal
-            highlighters.add(highlighter)
+                val markupModel = editor.markupModel
+                val highlighter = markupModel.addRangeHighlighter(
+                    startOffset,
+                    endOffset,
+                    HighlighterLayer.SELECTION - 1,
+                    grayAttributes,
+                    HighlighterTargetArea.EXACT_RANGE
+                )
+
+                // Store the highlighter for later removal
+                highlighters.add(highlighter)
+            }
 
         } else {
             val markupModel = editor.markupModel

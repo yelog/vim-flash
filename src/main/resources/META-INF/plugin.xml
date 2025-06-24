@@ -27,6 +27,24 @@ xmap s <Action>(flash.search)
           Off course you can use other keybindings. for example <code>map <leader>s <Action>(flash.search)</code>
         </p>
 
+        <h2>Enhanced Vim F Feature</h2>
+        <p>
+          New enhanced vim f functionality similar to classic vim f command:
+          <pre>
+nmap f <Action>(flash.vim_f)
+xmap f <Action>(flash.vim_f)
+          </pre>
+          <br>
+          This feature:
+          <ul>
+            <li>Grays out text after cursor when activated</li>
+            <li>Highlights all matching characters after cursor with red background</li>
+            <li>Jumps to the nearest match automatically</li>
+            <li>Press 'f' again to jump to next match</li>
+            <li>Press Esc or Backspace to exit search mode</li>
+          </ul>
+        </p>
+
         <h2>Configuration</h2>
         <p>
           Find <code>Settings -> Others Settings -> vim-flash</code> to configure the plugin.
@@ -94,6 +112,8 @@ xmap s <Action>(flash.search)
     <actions>
         <action id="flash.search" class="org.yelog.ideavim.flash.SearchAction" text="Search"
                 description="Input 1 character and jump to any same character."/>
+        <action id="flash.vim_f" class="org.yelog.ideavim.flash.VimFAction" text="Vim F"
+                description="Enhanced vim f functionality - find character after cursor and jump."/>
     </actions>
 
 </idea-plugin>

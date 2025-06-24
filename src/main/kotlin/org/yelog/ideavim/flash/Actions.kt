@@ -27,6 +27,10 @@ class SearchAction : BaseAction() {
     override fun getMode() = JumpHandler.MODE_CHAR1
 }
 
+class VimFAction : BaseAction() {
+    override fun getMode() = JumpHandler.MODE_VIM_F
+}
+
 class GotoRecent : BaseAction() {
     override fun getMode() = JumpHandler.MODE_CHAR2
 }

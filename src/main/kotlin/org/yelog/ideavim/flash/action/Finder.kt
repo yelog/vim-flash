@@ -17,6 +17,11 @@ interface Finder {
     fun input(e: Editor, c: Char, lastMarks: List<MarksCanvas.Mark>, searchString: String): List<MarksCanvas.Mark>?
 
     /**
+     * Clean up any resources like highlighters when search ends
+     */
+    fun cleanup(e: Editor) {}
+
+    /**
      * @return Return the marks whose start character is removed.
      */
     fun advanceMarks(c: Char, marks: List<MarksCanvas.Mark>): List<MarksCanvas.Mark> {
