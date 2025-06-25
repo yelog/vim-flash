@@ -62,16 +62,25 @@ class VimF : Finder {
             val nextOffset = allMatches[currentMatchIndex]
             // Calculate if the caret's line is outside the visible area (vertically)
             e.caretModel.currentCaret.moveToOffset(nextOffset)
-            val caretOffset = e.caretModel.offset
-            val isCaretNotVisible = caretOffset < visibleRange.startOffset || caretOffset > visibleRange.endOffset
+//            val caretOffset = e.caretModel.offset
 
-            if (isCaretNotVisible) {
+            val scrolloff = config.scrolloff
+            val caretLine = e.caretModel.logicalPosition.line
+            val visibleStartLine = e.offsetToLogicalPosition(visibleRange.startOffset).line
+            val visibleEndLine = e.offsetToLogicalPosition(visibleRange.endOffset).line
+
+            val shouldScrollDown = caretLine >= visibleEndLine - scrolloff + 1
+            val shouldScrollUp = caretLine <= visibleStartLine + scrolloff - 1
+            val shouldScroll = shouldScrollDown || shouldScrollUp
+//            val isCaretNotVisible = caretOffset < visibleRange.startOffset || caretOffset > visibleRange.endOffset
+
+            if (shouldScroll) {
                 // 将当前光标所在行滚动到可视区域的最后一行
                 val caretLine = e.caretModel.logicalPosition.line
                 val targetY = e.logicalPositionToXY(com.intellij.openapi.editor.LogicalPosition(caretLine, 0)).y
                 val visibleHeight = e.scrollingModel.visibleArea.height
                 // 计算出滚动条的绝对位置。-1 是为了防止可视区域包含看不见的下一行
-                val scrollY = targetY - visibleHeight + e.lineHeight - 1
+                val scrollY = targetY - visibleHeight + e.lineHeight * (scrolloff + 1) - 1
                 // 设置滚动条位置
                 e.scrollingModel.scrollVertically(scrollY.coerceAtLeast(0))
             }

@@ -16,6 +16,7 @@ class ConfigUI {
     private lateinit var matchNearestBgTF: JTextField
     private lateinit var labelBeforeMatchCB: javax.swing.JCheckBox // Added for form binding
     private lateinit var autoJumpWhenSingleCB: javax.swing.JCheckBox // Added for form binding
+    private lateinit var scrolloffTF:  JTextField // Added for form binding
 
     var characters: String?
         get() = charactersTF.text
@@ -113,5 +114,14 @@ class ConfigUI {
         }
         set(b) {
             autoJumpWhenSingleCB.isSelected = b
+        }
+    var scrolloff: Int
+        get() = try {
+            Integer.parseInt(scrolloffTF.text)
+        } catch (e: NumberFormatException) {
+            0
+        }
+        set(i) {
+            scrolloffTF.text = i.toString()
         }
 }
