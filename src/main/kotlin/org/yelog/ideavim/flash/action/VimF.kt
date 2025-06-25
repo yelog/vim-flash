@@ -8,8 +8,8 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.util.TextRange
 import org.yelog.ideavim.flash.MarksCanvas
 import org.yelog.ideavim.flash.UserConfig
+import org.yelog.ideavim.flash.utils.getVisibleRangeOffset
 import java.awt.Color
-import kotlin.math.abs
 
 class VimF : Finder {
     // Record the string of the entire document
@@ -17,22 +17,22 @@ class VimF : Finder {
 
     // Record the position of the visible area relative to the beginning of the document
     private lateinit var visibleRange: TextRange
-    
+
     // Current cursor position
     private var cursorOffset: Int = 0
-    
+
     // Target character to search for
     private var targetChar: Char? = null
-    
+
     // All match positions for the target character (after cursor only)
     private var allMatches: List<Int> = emptyList()
-    
+
     // Current match index
     private var currentMatchIndex: Int = -1
-    
+
     // List to keep track of character highlighters
     private val charHighlighters = mutableListOf<RangeHighlighter>()
-    
+
     // Config instance
     private val config: UserConfig.DataBean by lazy { UserConfig.getDataBean() }
 
@@ -53,21 +53,32 @@ class VimF : Finder {
         lastMarks: List<MarksCanvas.Mark>,
         searchString: String
     ): List<MarksCanvas.Mark>? {
-        
+        visibleRange = e.getVisibleRangeOffset()
+
         // If it's the 'f' key for continuing to next match
         if (c == 'f' && targetChar != null && allMatches.isNotEmpty()) {
             // Move to next match
             currentMatchIndex = (currentMatchIndex + 1) % allMatches.size
             val nextOffset = allMatches[currentMatchIndex]
+            // Calculate if the caret's line is outside the visible area (vertically)
             e.caretModel.currentCaret.moveToOffset(nextOffset)
-            
-            // Update cursor position for future searches
-            this.cursorOffset = nextOffset
-            
+            val caretOffset = e.caretModel.offset
+            val isCaretNotVisible = caretOffset < visibleRange.startOffset || caretOffset > visibleRange.endOffset
+
+            if (isCaretNotVisible) {
+                // 将当前光标所在行滚动到可视区域的最后一行
+                val caretLine = e.caretModel.logicalPosition.line
+                val targetY = e.logicalPositionToXY(com.intellij.openapi.editor.LogicalPosition(caretLine, 0)).y
+                val visibleHeight = e.scrollingModel.visibleArea.height
+                // 计算出滚动条的绝对位置。-1 是为了防止可视区域包含看不见的下一行
+                val scrollY = targetY - visibleHeight + e.lineHeight - 1
+                // 设置滚动条位置
+                e.scrollingModel.scrollVertically(scrollY.coerceAtLeast(0))
+            }
             // Return single mark to indicate completion but keep search active
             return listOf(MarksCanvas.Mark("", nextOffset, 1))
         }
-        
+
         if (lastMarks.any { it.keyTag.contains(c) }) {
             // Hit a tag - advance marks
             return advanceMarks(c, lastMarks)
@@ -75,90 +86,89 @@ class VimF : Finder {
             // First character input - this becomes our target character
             if (targetChar == null) {
                 targetChar = c
-                
+
                 // Search in entire document after cursor position
                 allMatches = findMatchesInDocument(c)
-                
+
                 if (allMatches.isEmpty()) {
                     // No matches found
                     return emptyList()
                 }
-                
+
                 // Highlight all visible matches with configured colors
                 highlightCharacters(e, allMatches)
-                
+
                 // Jump to the closest match immediately
                 currentMatchIndex = 0
                 val closestOffset = allMatches[0]
+                val isNotInVisible = closestOffset < visibleRange.startOffset || closestOffset > visibleRange.endOffset
                 e.caretModel.currentCaret.moveToOffset(closestOffset)
-                
+                if (isNotInVisible) {
+                    // Scroll the file so that the line with the caret is center in the visible area
+                    e.scrollingModel.scrollToCaret(com.intellij.openapi.editor.ScrollType.MAKE_VISIBLE)
+                }
+
                 // Update cursor position for future searches
                 this.cursorOffset = closestOffset
-                
+
                 // Return single mark to indicate completion but keep finder active for 'f' repeats
                 return listOf(MarksCanvas.Mark("", closestOffset, 1))
             }
-            
+
             // If we get here, it means an unexpected character was typed
             // Clear highlights and end the search
             clearCharHighlighters(e)
             return emptyList()
         }
     }
-    
+
     private fun findMatchesInDocument(c: Char): List<Int> {
         val matches = mutableListOf<Int>()
-        
+
         // For lowercase letters, search case-insensitively
         val searchChars = if (c.isLowerCase()) {
             listOf(c, c.uppercaseChar())
         } else {
             listOf(c)
         }
-        
+
         // Search only after cursor position (exclusive)
         for (i in (cursorOffset + 1) until documentText.length) {
             if (searchChars.contains(documentText[i])) {
                 matches.add(i)
             }
         }
-        
+
         return matches
     }
-    
+
     private fun highlightCharacters(editor: Editor, offsets: List<Int>) {
         clearCharHighlighters(editor)
-        
+
         // Use configured colors
         val highlightAttributes = TextAttributes().apply {
             backgroundColor = Color(config.labelBg, true)
             foregroundColor = Color(config.labelFg, true)
         }
-        
+
         val markupModel = editor.markupModel
-        
-        // Only highlight matches that are visible in the current viewport
-        val visibleStart = visibleRange.startOffset
-        val visibleEnd = visibleRange.endOffset
-        
+
         for (offset in offsets) {
-            if (offset >= visibleStart && offset < visibleEnd) {
-                val highlighter = markupModel.addRangeHighlighter(
-                    offset,
-                    offset + 1,
-                    HighlighterLayer.SELECTION + 1,
-                    highlightAttributes,
-                    HighlighterTargetArea.EXACT_RANGE
-                )
-                charHighlighters.add(highlighter)
-            }
+            val highlighter = markupModel.addRangeHighlighter(
+                offset,
+                offset + 1,
+                HighlighterLayer.SELECTION + 1,
+                highlightAttributes,
+                HighlighterTargetArea.EXACT_RANGE
+            )
+            charHighlighters.add(highlighter)
         }
     }
-    
+
     override fun cleanup(e: Editor) {
         clearCharHighlighters(e)
     }
-    
+
     private fun clearCharHighlighters(editor: Editor) {
         val markupModel = editor.markupModel
         charHighlighters.forEach { markupModel.removeHighlighter(it) }

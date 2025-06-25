@@ -38,6 +38,7 @@ object JumpHandler : TypedActionHandler {
     private var onJump: (() -> Unit)? = null // Runnable that is called after jump
     private var lastMarks: List<MarksCanvas.Mark> = emptyList()
     private var isCanvasAdded = false
+
     // Record the string being currently searched
     private var searchString = ""
 
@@ -77,7 +78,7 @@ object JumpHandler : TypedActionHandler {
     }
 
 
-    private fun jumpOrShowCanvas(editor: Editor,marks: List<MarksCanvas.Mark>) {
+    private fun jumpOrShowCanvas(editor: Editor, marks: List<MarksCanvas.Mark>) {
         when {
             marks.isEmpty() -> {
                 stop(editor)
@@ -89,7 +90,7 @@ object JumpHandler : TypedActionHandler {
                     // The VimF already jumped to the position, just keep search active
                     return
                 }
-                
+
                 val caret = editor.caretModel.currentCaret
                 if (caret.hasSelection()) {
                     val downOffset =
@@ -208,22 +209,13 @@ object JumpHandler : TypedActionHandler {
             // Set gray color of text
             val startOffset: Int
             val endOffset: Int
-            
+
             if (mode == MODE_VIM_F) {
                 // For vim f mode, gray out text after cursor
                 val cursorOffset = editor.caretModel.offset
-                val visibleArea = editor.scrollingModel.visibleArea
-                val visibleEndLogicalPosition = editor.xyToLogicalPosition(
-                    visibleArea.location.apply {
-                        this.x += visibleArea.width
-                        this.y += visibleArea.height
-                    }
-                )
-                val visibleEndOffset = editor.logicalPositionToOffset(visibleEndLogicalPosition)
-                
-                // Start from cursor position, end at visible area end or document end
+                // Start from cursor position, end document end
                 startOffset = cursorOffset
-                endOffset = minOf(visibleEndOffset, editor.document.textLength)
+                endOffset = editor.document.textLength
             } else {
                 // For search modes, gray out all visible text
                 val visibleArea = editor.scrollingModel.visibleArea
