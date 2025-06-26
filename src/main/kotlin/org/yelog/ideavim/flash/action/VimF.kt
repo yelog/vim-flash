@@ -21,7 +21,7 @@ class VimF : Finder {
     // Record the position of the visible area relative to the beginning of the document
     private lateinit var visibleRange: TextRange
 
-    private var mode: Mode = Mode.VIM_F;
+    private var mode: Mode = Mode.VIM_F
 
     // Current cursor position
     private var cursorOffset: Int = 0
@@ -35,6 +35,19 @@ class VimF : Finder {
     // Current match index
     private var currentMatchIndex: Int = -1
 
+    // --- For repeat mode support ---
+    companion object {
+        private var lastTargetChar: Char? = null
+        private var lastMode: Mode = Mode.VIM_F
+    }
+
+    private fun getMode(): Mode {
+        return if (mode.isRepeat()) {
+            lastMode
+        } else {
+            mode
+        }
+    }
 
     // List to keep track of character highlighters
     private val charHighlighters = mutableListOf<RangeHighlighter>()
@@ -52,6 +65,17 @@ class VimF : Finder {
         this.currentMatchIndex = -1
         this.mode = mode
         clearCharHighlighters(e)
+
+        // If repeat mode, restore last mode and targetChar
+        if (mode.isRepeat()) {
+            lastMode = lastMode.toNotAll()
+            setGrayColor(e, true, getMode())
+            if (lastTargetChar != null) {
+                this.targetChar = lastTargetChar
+                paintMarksAndJumpNext(e)
+            }
+        }
+
         return null
     }
 
@@ -64,15 +88,19 @@ class VimF : Finder {
         visibleRange = e.getVisibleRangeOffset()
 
         // If it's the 'f' key for continuing to next match
-        if (mode.matchChar(c) && targetChar != null && allMatches.isNotEmpty()) {
+        if (getMode().matchChar(c) && targetChar != null && allMatches.isNotEmpty()) {
             // 反向查找时
             if (Mode.isBackward(c)) {
                 if (currentMatchIndex - 1 < 0) {
-                    if (mode.isVimNotAll()) {
-                        mode = mode.toAll()
+                    if (getMode().isVimNotAll()) {
+                        if (mode.isRepeat()) {
+                            lastMode = lastMode.toAll()
+                        } else {
+                            mode = mode.toAll()
+                        }
                         val otherMatches = findMatchesInDocument(targetChar!!)
                         if (otherMatches.isNotEmpty()) {
-                            setGrayColor(e, true, mode)
+                            setGrayColor(e, true, getMode())
                             allMatches = otherMatches + allMatches
                             currentMatchIndex = otherMatches.size - 1
                             highlightCharacters(e, allMatches)
@@ -86,7 +114,7 @@ class VimF : Finder {
             }
             val nextOffset = allMatches[currentMatchIndex]
             // Calculate if the caret's line is outside the visible area (vertically)
-            JumpHandler.moveToOffset(e, nextOffset + mode.getOffset())
+            JumpHandler.moveToOffset(e, nextOffset + getMode().getOffset())
 //            val caretOffset = e.caretModel.offset
 
             val scrolloff = config.scrolloff
@@ -120,33 +148,10 @@ class VimF : Finder {
             // First character input - this becomes our target character
             if (targetChar == null) {
                 targetChar = c
-
-                // Search in entire document after cursor position
-                allMatches = findMatchesInDocument(c)
-
-                if (allMatches.isEmpty()) {
-                    // No matches found
-                    return emptyList()
-                }
-
-                // Highlight all visible matches with configured colors
-                highlightCharacters(e, allMatches)
-
-                // Jump to the closest match immediately
-                currentMatchIndex = 0
-                val closestOffset = allMatches[0]
-                val isNotInVisible = closestOffset < visibleRange.startOffset || closestOffset > visibleRange.endOffset
-                JumpHandler.moveToOffset(e, closestOffset + mode.getOffset())
-                if (isNotInVisible) {
-                    // Scroll the file so that the line with the caret is center in the visible area
-                    e.scrollingModel.scrollToCaret(com.intellij.openapi.editor.ScrollType.MAKE_VISIBLE)
-                }
-
-                // Update cursor position for future searches
-//                this.cursorOffset = closestOffset
-
-                // Return single mark to indicate completion but keep finder active for 'f' repeats
-                return listOf(MarksCanvas.Mark("", closestOffset, 1))
+                // Save for repeat
+                lastTargetChar = c
+                lastMode = getMode()
+                return paintMarksAndJumpNext(e)
             }
 
             // If we get here, it means an unexpected character was typed
@@ -154,6 +159,32 @@ class VimF : Finder {
             clearCharHighlighters(e)
             return emptyList()
         }
+    }
+
+    private fun paintMarksAndJumpNext(e: Editor): List<MarksCanvas.Mark>? {
+        // Search in entire document after cursor position
+        allMatches = findMatchesInDocument(targetChar!!)
+
+        if (allMatches.isEmpty()) {
+            // No matches found
+            return emptyList()
+        }
+
+        // Highlight all visible matches with configured colors
+        highlightCharacters(e, allMatches)
+
+        // Jump to the closest match immediately
+        currentMatchIndex = 0
+        val closestOffset = allMatches[0]
+        val isNotInVisible = closestOffset < visibleRange.startOffset || closestOffset > visibleRange.endOffset
+        JumpHandler.moveToOffset(e, closestOffset + getMode().getOffset())
+        if (isNotInVisible) {
+            // Scroll the file so that the line with the caret is center in the visible area
+            e.scrollingModel.scrollToCaret(com.intellij.openapi.editor.ScrollType.MAKE_VISIBLE)
+        }
+
+        // Return single mark to indicate completion but keep finder active for 'f' repeats
+        return listOf(MarksCanvas.Mark("", closestOffset, 1))
     }
 
     private fun findMatchesInDocument(c: Char): List<Int> {
@@ -165,7 +196,7 @@ class VimF : Finder {
         } else {
             listOf(c)
         }
-        val indexRange = when (mode) {
+        val indexRange = when (getMode()) {
             Mode.VIM_F, Mode.VIM_T -> (cursorOffset + 1) until documentText.length
             Mode.VIM_F_ALL, Mode.VIM_T_ALL -> 0 until cursorOffset
             Mode.VIM_F_BACKWARD, Mode.VIM_T_BACKWARD -> (cursorOffset - 1) downTo 0
@@ -176,8 +207,8 @@ class VimF : Finder {
         indexRange
             .filter { i -> searchChars.contains(documentText[i]) }
             .filterNot { i ->
-                (mode.isTillBefore() && (i == 0 || documentText[i - 1] == '\n')) ||
-                        (mode.isTillAfter() && (i == documentText.length - 1 || documentText[i + 1] == '\n'))
+                (getMode().isTillBefore() && (i == 0 || documentText[i - 1] == '\n')) ||
+                        (getMode().isTillAfter() && (i == documentText.length - 1 || documentText[i + 1] == '\n'))
             }
             .forEach { matches.add(it) }
         return matches
@@ -200,8 +231,8 @@ class VimF : Finder {
         val markupModel = editor.markupModel
 
         for (offset in offsets) {
-            if (mode.isTill()) {
-                val tillOffset = mode.isTillBefore().let {
+            if (getMode().isTill()) {
+                val tillOffset = getMode().isTillBefore().let {
                     if (it) -1 else 1
                 }
                 val highlighter = markupModel.addRangeHighlighter(

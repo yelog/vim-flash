@@ -107,6 +107,7 @@ xmap f <Action>(flash.vim_f)
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="org.yelog.ideavim.flash.UserConfig"/>
         <applicationConfigurable instance="org.yelog.ideavim.flash.Configurable"/>
+        <notificationGroup id="org.yelog.ideavim.flash" displayType="BALLOON" isLogByDefault="true"/>
     </extensions>
 
     <actions>

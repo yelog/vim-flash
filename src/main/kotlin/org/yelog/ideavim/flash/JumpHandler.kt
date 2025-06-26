@@ -128,12 +128,14 @@ object JumpHandler : TypedActionHandler {
         setGrayColor(editor, true, mode);
 
         onJump = null
-        when (mode) {
-            Mode.SEARCH -> finder = Search()
-            Mode.VIM_F -> finder = VimF()
-            Mode.VIM_F_BACKWARD -> finder = VimF()
-            Mode.VIM_T -> finder = VimF()
-            Mode.VIM_T_BACKWARD -> finder = VimF()
+        finder = when (mode) {
+            Mode.SEARCH -> Search()
+            Mode.VIM_F -> VimF()
+            Mode.VIM_F_BACKWARD -> VimF()
+            Mode.VIM_T -> VimF()
+            Mode.VIM_T_BACKWARD -> VimF()
+            Mode.VIM_REPEAT -> VimF()
+            Mode.VIM_REPEAT_BACKWARD -> VimF()
             else -> throw RuntimeException("Invalid start mode: $mode")
         }
         val marks = finder.start(editor, mode)

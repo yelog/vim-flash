@@ -59,6 +59,16 @@ enum class Mode(val char: Char) {
         }
     }
 
+    fun toNotAll(): Mode {
+        return when (this) {
+            VIM_F_ALL -> VIM_F
+            VIM_F_ALL_BACKWARD -> VIM_F_BACKWARD
+            VIM_T_ALL -> VIM_T
+            VIM_T_ALL_BACKWARD -> VIM_T_BACKWARD
+            else -> this
+        }
+    }
+
     fun isBackward(): Boolean = isBackward(this.char)
 
     fun matchChar(c: Char): Boolean {
@@ -67,6 +77,8 @@ enum class Mode(val char: Char) {
         } else {
             this.char.equals(c, true)
         }
-
     }
+
+    fun isRepeat(): Boolean = this == VIM_REPEAT || this == VIM_REPEAT_BACKWARD
+
 }
