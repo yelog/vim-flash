@@ -17,7 +17,6 @@ import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import org.yelog.ideavim.flash.action.Finder
 import org.yelog.ideavim.flash.action.Search
 import org.yelog.ideavim.flash.action.VimF
-import org.yelog.ideavim.flash.utils.getVisibleRangeOffset
 import java.awt.Color
 
 
@@ -26,6 +25,9 @@ object JumpHandler : TypedActionHandler {
     const val MODE_CHAR1 = 0
     const val MODE_CHAR2 = 1
     const val MODE_VIM_F = 2
+    const val MODE_VIM_F_BACKWARD = 3
+    const val MODE_VIM_F_ALL = 4
+    const val MODE_VIM_F_ALL_BACKWARD = 5
 
     private var mOldTypedHandler: TypedActionHandler? = null
     private var mOldEscActionHandler: EditorActionHandler? = null
@@ -162,11 +164,10 @@ object JumpHandler : TypedActionHandler {
             MODE_CHAR1 -> finder = Search()
             MODE_CHAR2 -> finder = Search()
             MODE_VIM_F -> finder = VimF()
+            MODE_VIM_F_BACKWARD -> finder = VimF()
             else -> throw RuntimeException("Invalid start mode: $mode")
         }
-        val visibleBorderOffset = editor.getVisibleRangeOffset()
-        val visibleString = editor.document.getText(visibleBorderOffset)
-        val marks = finder.start(editor, visibleString, visibleBorderOffset)
+        val marks = finder.start(editor, mode)
         if (marks != null) {
             lastMarks = marks
             jumpOrShowCanvas(editor, lastMarks)
@@ -204,30 +205,46 @@ object JumpHandler : TypedActionHandler {
         }
     }
 
-    private fun setGrayColor(editor: Editor, setGray: Boolean, mode: Int = MODE_CHAR1) {
+    fun setGrayColor(editor: Editor, setGray: Boolean, mode: Int = MODE_CHAR1) {
         if (setGray) {
             // Set gray color of text
             val startOffset: Int
             val endOffset: Int
 
-            if (mode == MODE_VIM_F) {
-                // For vim f mode, gray out text after cursor
-                val cursorOffset = editor.caretModel.offset
-                // Start from cursor position, end document end
-                startOffset = cursorOffset
-                endOffset = editor.document.textLength
-            } else {
-                // For search modes, gray out all visible text
-                val visibleArea = editor.scrollingModel.visibleArea
-                val startLogicalPosition = editor.xyToLogicalPosition(visibleArea.location)
-                val endLogicalPosition = editor.xyToLogicalPosition(
-                    visibleArea.location.apply {
-                        this.x += visibleArea.width
-                        this.y += visibleArea.height
-                    }
-                )
-                startOffset = editor.logicalPositionToOffset(startLogicalPosition)
-                endOffset = editor.logicalPositionToOffset(endLogicalPosition)
+            when (mode) {
+                MODE_VIM_F -> {
+                    // For vim f mode, gray out text after cursor
+                    val cursorOffset = editor.caretModel.offset
+                    startOffset = cursorOffset + 1
+                    endOffset = editor.document.textLength
+                }
+
+                MODE_VIM_F_BACKWARD -> {
+                    // For vim F mode, gray out text before cursor
+                    val cursorOffset = editor.caretModel.offset
+                    startOffset = 0
+                    endOffset = cursorOffset - 1
+                }
+
+                MODE_VIM_F_ALL, MODE_VIM_F_ALL_BACKWARD -> {
+                    // For vim f all mode, gray out all text
+                    startOffset = 0
+                    endOffset = editor.document.textLength
+                }
+
+                else -> {
+                    // For search modes, gray out all visible text
+                    val visibleArea = editor.scrollingModel.visibleArea
+                    val startLogicalPosition = editor.xyToLogicalPosition(visibleArea.location)
+                    val endLogicalPosition = editor.xyToLogicalPosition(
+                        visibleArea.location.apply {
+                            this.x += visibleArea.width
+                            this.y += visibleArea.height
+                        }
+                    )
+                    startOffset = editor.logicalPositionToOffset(startLogicalPosition)
+                    endOffset = editor.logicalPositionToOffset(endLogicalPosition)
+                }
             }
 
             if (startOffset < endOffset) {

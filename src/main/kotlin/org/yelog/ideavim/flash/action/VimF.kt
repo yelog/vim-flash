@@ -6,6 +6,8 @@ import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.util.TextRange
+import org.yelog.ideavim.flash.JumpHandler
+import org.yelog.ideavim.flash.JumpHandler.setGrayColor
 import org.yelog.ideavim.flash.MarksCanvas
 import org.yelog.ideavim.flash.UserConfig
 import org.yelog.ideavim.flash.utils.getVisibleRangeOffset
@@ -17,6 +19,8 @@ class VimF : Finder {
 
     // Record the position of the visible area relative to the beginning of the document
     private lateinit var visibleRange: TextRange
+
+    private var mode: Int = 0;
 
     // Current cursor position
     private var cursorOffset: Int = 0
@@ -30,19 +34,22 @@ class VimF : Finder {
     // Current match index
     private var currentMatchIndex: Int = -1
 
+
     // List to keep track of character highlighters
     private val charHighlighters = mutableListOf<RangeHighlighter>()
 
     // Config instance
     private val config: UserConfig.DataBean by lazy { UserConfig.getDataBean() }
 
-    override fun start(e: Editor, visibleString: String, visibleRange: TextRange): List<MarksCanvas.Mark>? {
+
+    override fun start(e: Editor, mode: Int): List<MarksCanvas.Mark>? {
         this.documentText = e.document.text
-        this.visibleRange = visibleRange
+        this.visibleRange = e.getVisibleRangeOffset()
         this.cursorOffset = e.caretModel.offset
         this.targetChar = null
         this.allMatches = emptyList()
         this.currentMatchIndex = -1
+        this.mode = mode
         clearCharHighlighters(e)
         return null
     }
@@ -56,9 +63,30 @@ class VimF : Finder {
         visibleRange = e.getVisibleRangeOffset()
 
         // If it's the 'f' key for continuing to next match
-        if (c == 'f' && targetChar != null && allMatches.isNotEmpty()) {
+        if ((c == 'f' || c == 'F') && targetChar != null && allMatches.isNotEmpty()) {
             // Move to next match
-            currentMatchIndex = (currentMatchIndex + 1) % allMatches.size
+            if (c == 'F') {
+                if (currentMatchIndex - 1 < 0) {
+                    if (mode == JumpHandler.MODE_VIM_F || mode == JumpHandler.MODE_VIM_F_BACKWARD) {
+                        mode = if (mode == JumpHandler.MODE_VIM_F) {
+                            JumpHandler.MODE_VIM_F_ALL
+                        } else {
+                            JumpHandler.MODE_VIM_F_ALL_BACKWARD
+                        }
+                        val otherMatches = findMatchesInDocument(targetChar!!)
+                        if (otherMatches.isNotEmpty()) {
+                            setGrayColor(e, true, mode)
+                            allMatches = otherMatches + allMatches
+                            currentMatchIndex = otherMatches.size - 1
+                            highlightCharacters(e, allMatches)
+                        }
+                    }
+                } else {
+                    currentMatchIndex--
+                }
+            } else {
+                currentMatchIndex = (currentMatchIndex + 1).coerceAtMost(allMatches.size - 1)
+            }
             val nextOffset = allMatches[currentMatchIndex]
             // Calculate if the caret's line is outside the visible area (vertically)
             e.caretModel.currentCaret.moveToOffset(nextOffset)
@@ -118,7 +146,7 @@ class VimF : Finder {
                 }
 
                 // Update cursor position for future searches
-                this.cursorOffset = closestOffset
+//                this.cursorOffset = closestOffset
 
                 // Return single mark to indicate completion but keep finder active for 'f' repeats
                 return listOf(MarksCanvas.Mark("", closestOffset, 1))
@@ -140,11 +168,34 @@ class VimF : Finder {
         } else {
             listOf(c)
         }
-
-        // Search only after cursor position (exclusive)
-        for (i in (cursorOffset + 1) until documentText.length) {
-            if (searchChars.contains(documentText[i])) {
-                matches.add(i)
+        if (mode == JumpHandler.MODE_VIM_F_ALL_BACKWARD) {
+            for (i in documentText.length - 1 downTo cursorOffset) {
+                if (searchChars.contains(documentText[i])) {
+                    matches.add(i)
+                }
+            }
+        }
+        if (mode == JumpHandler.MODE_VIM_F_BACKWARD) {
+            // For backward search, we need to search from the end of the document
+            for (i in (cursorOffset - 1) downTo 0) {
+                if (searchChars.contains(documentText[i])) {
+                    matches.add(i)
+                }
+            }
+        }
+        if (mode == JumpHandler.MODE_VIM_F_ALL) {
+            for (i in 0 until cursorOffset) {
+                if (searchChars.contains(documentText[i])) {
+                    matches.add(i)
+                }
+            }
+        }
+        if (mode == JumpHandler.MODE_VIM_F) {
+            // Search only after cursor position (exclusive)
+            for (i in (cursorOffset + 1) until documentText.length) {
+                if (searchChars.contains(documentText[i])) {
+                    matches.add(i)
+                }
             }
         }
 

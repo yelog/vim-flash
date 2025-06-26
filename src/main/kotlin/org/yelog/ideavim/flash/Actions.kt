@@ -34,3 +34,7 @@ class VimFAction : BaseAction() {
 class GotoRecent : BaseAction() {
     override fun getMode() = JumpHandler.MODE_CHAR2
 }
+
+class VimFBackwardAction : BaseAction() {
+    override fun getMode() = JumpHandler.MODE_VIM_F_BACKWARD
+}

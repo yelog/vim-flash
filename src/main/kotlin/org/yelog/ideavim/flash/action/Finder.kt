@@ -9,7 +9,7 @@ interface Finder {
      * @return null - need more input to locate.
      *         not null - can be locate some data, empty represent without any matches.
      */
-    fun start(e: Editor, visibleString: String, visibleRange: TextRange): List<MarksCanvas.Mark>?
+    fun start(e: Editor, mode: Int): List<MarksCanvas.Mark>?
 
     /**
      * @return same with [.start]

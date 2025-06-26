@@ -114,6 +114,8 @@ xmap f <Action>(flash.vim_f)
                 description="Input 1 character and jump to any same character."/>
         <action id="flash.vim_f" class="org.yelog.ideavim.flash.VimFAction" text="Vim F"
                 description="Enhanced vim f functionality - find character after cursor and jump."/>
+        <action id="flash.vim_F" class="org.yelog.ideavim.flash.VimFBackwardAction" text="Vim F Backward"
+                description="Enhanced vim F functionality - find character before cursor and jump."/>
     </actions>
 
 </idea-plugin>
