@@ -116,6 +116,10 @@ xmap f <Action>(flash.vim_f)
                 description="Enhanced vim f functionality - find character after cursor and jump."/>
         <action id="flash.vim_F" class="org.yelog.ideavim.flash.VimFBackwardAction" text="Vim F Backward"
                 description="Enhanced vim F functionality - find character before cursor and jump."/>
+        <action id="flash.vim_t" class="org.yelog.ideavim.flash.VimTAction" text="Vim T"
+                description="Enhanced vim T functionality - find character after cursor and jump."/>
+        <action id="flash.vim_T" class="org.yelog.ideavim.flash.VimTBackwardAction" text="Vim T Backward"
+                description="Enhanced vim T functionality - find character before cursor and jump."/>
     </actions>
 
 </idea-plugin>

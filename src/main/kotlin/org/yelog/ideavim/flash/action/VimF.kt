@@ -9,6 +9,7 @@ import com.intellij.openapi.util.TextRange
 import org.yelog.ideavim.flash.JumpHandler
 import org.yelog.ideavim.flash.JumpHandler.setGrayColor
 import org.yelog.ideavim.flash.MarksCanvas
+import org.yelog.ideavim.flash.Mode
 import org.yelog.ideavim.flash.UserConfig
 import org.yelog.ideavim.flash.utils.getVisibleRangeOffset
 import java.awt.Color
@@ -20,7 +21,7 @@ class VimF : Finder {
     // Record the position of the visible area relative to the beginning of the document
     private lateinit var visibleRange: TextRange
 
-    private var mode: Int = 0;
+    private var mode: Mode = Mode.VIM_F;
 
     // Current cursor position
     private var cursorOffset: Int = 0
@@ -42,7 +43,7 @@ class VimF : Finder {
     private val config: UserConfig.DataBean by lazy { UserConfig.getDataBean() }
 
 
-    override fun start(e: Editor, mode: Int): List<MarksCanvas.Mark>? {
+    override fun start(e: Editor, mode: Mode): List<MarksCanvas.Mark>? {
         this.documentText = e.document.text
         this.visibleRange = e.getVisibleRangeOffset()
         this.cursorOffset = e.caretModel.offset
@@ -63,16 +64,12 @@ class VimF : Finder {
         visibleRange = e.getVisibleRangeOffset()
 
         // If it's the 'f' key for continuing to next match
-        if ((c == 'f' || c == 'F') && targetChar != null && allMatches.isNotEmpty()) {
-            // Move to next match
-            if (c == 'F') {
+        if (Mode.isVimMode(c) && targetChar != null && allMatches.isNotEmpty()) {
+            // 反向查找时
+            if (Mode.isBackward(c)) {
                 if (currentMatchIndex - 1 < 0) {
-                    if (mode == JumpHandler.MODE_VIM_F || mode == JumpHandler.MODE_VIM_F_BACKWARD) {
-                        mode = if (mode == JumpHandler.MODE_VIM_F) {
-                            JumpHandler.MODE_VIM_F_ALL
-                        } else {
-                            JumpHandler.MODE_VIM_F_ALL_BACKWARD
-                        }
+                    if (mode.isVimNotAll()) {
+                        mode = mode.toAll()
                         val otherMatches = findMatchesInDocument(targetChar!!)
                         if (otherMatches.isNotEmpty()) {
                             setGrayColor(e, true, mode)
@@ -89,7 +86,7 @@ class VimF : Finder {
             }
             val nextOffset = allMatches[currentMatchIndex]
             // Calculate if the caret's line is outside the visible area (vertically)
-            JumpHandler.moveToOffset(e, nextOffset)
+            JumpHandler.moveToOffset(e, nextOffset + mode.getOffset())
 //            val caretOffset = e.caretModel.offset
 
             val scrolloff = config.scrolloff
@@ -139,7 +136,7 @@ class VimF : Finder {
                 currentMatchIndex = 0
                 val closestOffset = allMatches[0]
                 val isNotInVisible = closestOffset < visibleRange.startOffset || closestOffset > visibleRange.endOffset
-                JumpHandler.moveToOffset(e, closestOffset)
+                JumpHandler.moveToOffset(e, closestOffset + mode.getOffset())
                 if (isNotInVisible) {
                     // Scroll the file so that the line with the caret is center in the visible area
                     e.scrollingModel.scrollToCaret(com.intellij.openapi.editor.ScrollType.MAKE_VISIBLE)
@@ -168,37 +165,18 @@ class VimF : Finder {
         } else {
             listOf(c)
         }
-        if (mode == JumpHandler.MODE_VIM_F_ALL_BACKWARD) {
-            for (i in documentText.length - 1 downTo cursorOffset) {
-                if (searchChars.contains(documentText[i])) {
-                    matches.add(i)
-                }
+        val indexRange = when (mode) {
+            Mode.VIM_F, Mode.VIM_T -> (cursorOffset + 1) until documentText.length
+            Mode.VIM_F_ALL, Mode.VIM_T_ALL -> 0 until cursorOffset
+            Mode.VIM_F_BACKWARD, Mode.VIM_T_BACKWARD -> (cursorOffset - 1) downTo 0
+            Mode.VIM_F_ALL_BACKWARD, Mode.VIM_T_ALL_BACKWARD -> documentText.length - 1 downTo cursorOffset
+            else -> return emptyList() // Should not happen
+        }
+        for (i in indexRange) {
+            if (searchChars.contains(documentText[i])) {
+                matches.add(i)
             }
         }
-        if (mode == JumpHandler.MODE_VIM_F_BACKWARD) {
-            // For backward search, we need to search from the end of the document
-            for (i in (cursorOffset - 1) downTo 0) {
-                if (searchChars.contains(documentText[i])) {
-                    matches.add(i)
-                }
-            }
-        }
-        if (mode == JumpHandler.MODE_VIM_F_ALL) {
-            for (i in 0 until cursorOffset) {
-                if (searchChars.contains(documentText[i])) {
-                    matches.add(i)
-                }
-            }
-        }
-        if (mode == JumpHandler.MODE_VIM_F) {
-            // Search only after cursor position (exclusive)
-            for (i in (cursorOffset + 1) until documentText.length) {
-                if (searchChars.contains(documentText[i])) {
-                    matches.add(i)
-                }
-            }
-        }
-
         return matches
     }
 
@@ -211,9 +189,27 @@ class VimF : Finder {
             foregroundColor = Color(config.labelFg, true)
         }
 
+        val placeholderAttributes = TextAttributes().apply {
+            backgroundColor = Color(config.matchBg, true)
+            foregroundColor = Color(config.matchFg, true)
+        }
+
         val markupModel = editor.markupModel
 
         for (offset in offsets) {
+            if (mode.isTill()) {
+                val tillOffset = mode.isTillBefore().let {
+                    if (it) -1 else 1
+                }
+                val highlighter = markupModel.addRangeHighlighter(
+                    offset + tillOffset,
+                    offset + 1 + tillOffset,
+                    HighlighterLayer.SELECTION + 1,
+                    placeholderAttributes,
+                    HighlighterTargetArea.EXACT_RANGE
+                )
+                charHighlighters.add(highlighter)
+            }
             val highlighter = markupModel.addRangeHighlighter(
                 offset,
                 offset + 1,

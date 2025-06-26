@@ -15,7 +15,7 @@ abstract class BaseAction : DumbAwareAction() {
         JumpHandler.start(getMode(), e)
     }
 
-    abstract fun getMode(): Int
+    abstract fun getMode(): Mode
 
     override fun getActionUpdateThread(): ActionUpdateThread {
         // Select the appropriate thread type as needed; EDT is typically used for UI-related operations.
@@ -24,17 +24,21 @@ abstract class BaseAction : DumbAwareAction() {
 }
 
 class SearchAction : BaseAction() {
-    override fun getMode() = JumpHandler.MODE_CHAR1
+    override fun getMode() = Mode.SEARCH
 }
 
 class VimFAction : BaseAction() {
-    override fun getMode() = JumpHandler.MODE_VIM_F
-}
-
-class GotoRecent : BaseAction() {
-    override fun getMode() = JumpHandler.MODE_CHAR2
+    override fun getMode() = Mode.VIM_F
 }
 
 class VimFBackwardAction : BaseAction() {
-    override fun getMode() = JumpHandler.MODE_VIM_F_BACKWARD
+    override fun getMode() = Mode.VIM_F_BACKWARD
+}
+
+class VimTAction : BaseAction() {
+    override fun getMode() = Mode.VIM_T
+}
+
+class VimTBackwardAction : BaseAction() {
+    override fun getMode() = Mode.VIM_T_BACKWARD
 }

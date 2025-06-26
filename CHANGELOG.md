@@ -2,6 +2,11 @@
 
 # vim-flash Changelog
 
+## 0.1.0
+
+- fix: update selection and history when jump
+- feat: `f`, `F`, `t`, `T`, `;` and `,` motions
+
 ## 0.0.9
 
 - support auto jump when only one match

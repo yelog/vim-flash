@@ -3,13 +3,14 @@ package org.yelog.ideavim.flash.action
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
 import org.yelog.ideavim.flash.MarksCanvas
+import org.yelog.ideavim.flash.Mode
 
 interface Finder {
     /**
      * @return null - need more input to locate.
      *         not null - can be locate some data, empty represent without any matches.
      */
-    fun start(e: Editor, mode: Int): List<MarksCanvas.Mark>?
+    fun start(e: Editor, mode: Mode): List<MarksCanvas.Mark>?
 
     /**
      * @return same with [.start]

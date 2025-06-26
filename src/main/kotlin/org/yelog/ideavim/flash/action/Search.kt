@@ -4,6 +4,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
 import org.yelog.ideavim.flash.KeyTagsGenerator
 import org.yelog.ideavim.flash.MarksCanvas
+import org.yelog.ideavim.flash.Mode
 import org.yelog.ideavim.flash.UserConfig
 import org.yelog.ideavim.flash.utils.findAll
 import org.yelog.ideavim.flash.utils.getVisibleRangeOffset
@@ -17,7 +18,7 @@ class Search : Finder {
     // Record the position of the visible area relative to the beginning of the document
     private lateinit var visibleRange: TextRange
 
-    override fun start(e: Editor, mode: Int): List<MarksCanvas.Mark>? {
+    override fun start(e: Editor, mode: Mode): List<MarksCanvas.Mark>? {
         this.visibleRange = e.getVisibleRangeOffset()
         this.visibleString = e.document.getText(this.visibleRange)
         return null

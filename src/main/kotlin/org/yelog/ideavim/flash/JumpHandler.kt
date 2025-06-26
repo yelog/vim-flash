@@ -22,13 +22,6 @@ import java.awt.Color
 
 object JumpHandler : TypedActionHandler {
     private val config: UserConfig.DataBean by lazy { UserConfig.getDataBean() }
-    const val MODE_CHAR1 = 0
-    const val MODE_CHAR2 = 1
-    const val MODE_VIM_F = 2
-    const val MODE_VIM_F_BACKWARD = 3
-    const val MODE_VIM_F_ALL = 4
-    const val MODE_VIM_F_ALL_BACKWARD = 5
-
     private var mOldTypedHandler: TypedActionHandler? = null
     private var mOldEscActionHandler: EditorActionHandler? = null
     private var mOldBackSpaceActionHandler: EditorActionHandler? = null
@@ -36,7 +29,7 @@ object JumpHandler : TypedActionHandler {
     private val mMarksCanvas = MarksCanvas()
     private var isStart = false
     private lateinit var finder: Finder
-    private var currentMode = MODE_CHAR1
+    private var currentMode = Mode.SEARCH
     private var onJump: (() -> Unit)? = null // Runnable that is called after jump
     private var lastMarks: List<MarksCanvas.Mark> = emptyList()
     private var isCanvasAdded = false
@@ -88,7 +81,7 @@ object JumpHandler : TypedActionHandler {
 
             (marks.size == 1 && (config.autoJumpWhenSingle || marks[0].hintMark)) -> {
                 // For VimF mode, don't stop automatically - keep waiting for 'f' key
-                if (currentMode == MODE_VIM_F) {
+                if (currentMode.isVimMode()) {
                     // The VimF already jumped to the position, just keep search active
                     return
                 }
@@ -115,7 +108,7 @@ object JumpHandler : TypedActionHandler {
      *
      * @param mode mode enum, see [.MODE_CHAR1] [.MODE_CHAR2] etc
      */
-    fun start(mode: Int, anActionEvent: AnActionEvent) {
+    fun start(mode: Mode, anActionEvent: AnActionEvent) {
         if (isStart) return
         this.searchString = ""
         this.currentMode = mode
@@ -136,10 +129,11 @@ object JumpHandler : TypedActionHandler {
 
         onJump = null
         when (mode) {
-            MODE_CHAR1 -> finder = Search()
-            MODE_CHAR2 -> finder = Search()
-            MODE_VIM_F -> finder = VimF()
-            MODE_VIM_F_BACKWARD -> finder = VimF()
+            Mode.SEARCH -> finder = Search()
+            Mode.VIM_F -> finder = VimF()
+            Mode.VIM_F_BACKWARD -> finder = VimF()
+            Mode.VIM_T -> finder = VimF()
+            Mode.VIM_T_BACKWARD -> finder = VimF()
             else -> throw RuntimeException("Invalid start mode: $mode")
         }
         val marks = finder.start(editor, mode)
@@ -176,32 +170,32 @@ object JumpHandler : TypedActionHandler {
                 finder.cleanup(editor)
             }
             // get editor and remove the gray highlighters
-            setGrayColor(editor, false, MODE_CHAR1)
+            setGrayColor(editor, false, Mode.SEARCH)
         }
     }
 
-    fun setGrayColor(editor: Editor, setGray: Boolean, mode: Int = MODE_CHAR1) {
+    fun setGrayColor(editor: Editor, setGray: Boolean, mode: Mode = Mode.SEARCH) {
         if (setGray) {
             // Set gray color of text
             val startOffset: Int
             val endOffset: Int
 
             when (mode) {
-                MODE_VIM_F -> {
+                Mode.VIM_F, Mode.VIM_T -> {
                     // For vim f mode, gray out text after cursor
                     val cursorOffset = editor.caretModel.offset
                     startOffset = cursorOffset + 1
                     endOffset = editor.document.textLength
                 }
 
-                MODE_VIM_F_BACKWARD -> {
+                Mode.VIM_F_BACKWARD, Mode.VIM_T_BACKWARD -> {
                     // For vim F mode, gray out text before cursor
                     val cursorOffset = editor.caretModel.offset
                     startOffset = 0
                     endOffset = cursorOffset - 1
                 }
 
-                MODE_VIM_F_ALL, MODE_VIM_F_ALL_BACKWARD -> {
+                Mode.VIM_F_ALL, Mode.VIM_F_ALL_BACKWARD, Mode.VIM_T_ALL, Mode.VIM_T_ALL_BACKWARD -> {
                     // For vim f all mode, gray out all text
                     startOffset = 0
                     endOffset = editor.document.textLength
