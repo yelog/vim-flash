@@ -64,7 +64,7 @@ class VimF : Finder {
         visibleRange = e.getVisibleRangeOffset()
 
         // If it's the 'f' key for continuing to next match
-        if (Mode.isVimMode(c) && targetChar != null && allMatches.isNotEmpty()) {
+        if (mode.matchChar(c) && targetChar != null && allMatches.isNotEmpty()) {
             // 反向查找时
             if (Mode.isBackward(c)) {
                 if (currentMatchIndex - 1 < 0) {

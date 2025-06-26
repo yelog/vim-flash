@@ -27,18 +27,26 @@ class SearchAction : BaseAction() {
     override fun getMode() = Mode.SEARCH
 }
 
-class VimFAction : BaseAction() {
+class FindAction : BaseAction() {
     override fun getMode() = Mode.VIM_F
 }
 
-class VimFBackwardAction : BaseAction() {
+class FindBackwardAction : BaseAction() {
     override fun getMode() = Mode.VIM_F_BACKWARD
 }
 
-class VimTAction : BaseAction() {
+class TillAction : BaseAction() {
     override fun getMode() = Mode.VIM_T
 }
 
-class VimTBackwardAction : BaseAction() {
+class TillBackwardAction : BaseAction() {
     override fun getMode() = Mode.VIM_T_BACKWARD
+}
+
+class RepeatAction : BaseAction() {
+    override fun getMode() = Mode.VIM_REPEAT
+}
+
+class RepeatBackwardAction : BaseAction() {
+    override fun getMode() = Mode.VIM_REPEAT_BACKWARD
 }

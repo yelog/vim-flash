@@ -10,7 +10,9 @@ enum class Mode(val char: Char) {
     VIM_T('t'), // Vim 't' mode
     VIM_T_ALL('t'), // Vim 't' mode
     VIM_T_BACKWARD('T'), // Vim 'T' mode (backward)
-    VIM_T_ALL_BACKWARD('T'); // Vim 'T' mode (backward)
+    VIM_T_ALL_BACKWARD('T'), // Vim 'T' mode (backward)
+    VIM_REPEAT(';'), // Vim ';' repeat mode
+    VIM_REPEAT_BACKWARD(','); // Vim ',' repeat mode (backward)
 
     companion object {
         fun fromChar(c: Char): Mode? = values().find { it.char == c }
@@ -18,11 +20,14 @@ enum class Mode(val char: Char) {
             return c == VIM_F.char || c == VIM_F_BACKWARD.char ||
                     c == VIM_T.char || c == VIM_T_BACKWARD.char ||
                     c == VIM_F_ALL.char || c == VIM_F_ALL_BACKWARD.char ||
-                    c == VIM_T_ALL.char || c == VIM_T_ALL_BACKWARD.char
+                    c == VIM_T_ALL.char || c == VIM_T_ALL_BACKWARD.char ||
+                    c == VIM_REPEAT.char || c == VIM_REPEAT_BACKWARD.char
         }
+
         fun isBackward(c: Char): Boolean {
             return c == VIM_F_BACKWARD.char || c == VIM_T_BACKWARD.char ||
-                    c == VIM_F_ALL_BACKWARD.char || c == VIM_T_ALL_BACKWARD.char
+                    c == VIM_F_ALL_BACKWARD.char || c == VIM_T_ALL_BACKWARD.char ||
+                    c == VIM_REPEAT_BACKWARD.char
         }
     }
 
@@ -55,4 +60,13 @@ enum class Mode(val char: Char) {
     }
 
     fun isBackward(): Boolean = isBackward(this.char)
+
+    fun matchChar(c: Char): Boolean {
+        return if (c == VIM_REPEAT.char || c == VIM_REPEAT_BACKWARD.char) {
+            true
+        } else {
+            this.char.equals(c, true)
+        }
+
+    }
 }

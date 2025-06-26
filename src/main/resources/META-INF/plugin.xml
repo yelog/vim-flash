@@ -112,14 +112,19 @@ xmap f <Action>(flash.vim_f)
     <actions>
         <action id="flash.search" class="org.yelog.ideavim.flash.SearchAction" text="Search"
                 description="Input 1 character and jump to any same character."/>
-        <action id="flash.vim_f" class="org.yelog.ideavim.flash.VimFAction" text="Vim F"
+        <action id="flash.find" class="org.yelog.ideavim.flash.FindAction" text="Vim F"
                 description="Enhanced vim f functionality - find character after cursor and jump."/>
-        <action id="flash.vim_F" class="org.yelog.ideavim.flash.VimFBackwardAction" text="Vim F Backward"
+        <action id="flash.find_backward" class="org.yelog.ideavim.flash.FindBackwardAction" text="Vim F Backward"
                 description="Enhanced vim F functionality - find character before cursor and jump."/>
-        <action id="flash.vim_t" class="org.yelog.ideavim.flash.VimTAction" text="Vim T"
-                description="Enhanced vim T functionality - find character after cursor and jump."/>
-        <action id="flash.vim_T" class="org.yelog.ideavim.flash.VimTBackwardAction" text="Vim T Backward"
+        <action id="flash.till" class="org.yelog.ideavim.flash.TillAction" text="Vim T"
                 description="Enhanced vim T functionality - find character before cursor and jump."/>
+        <action id="flash.till_backward" class="org.yelog.ideavim.flash.TillBackwardAction" text="Vim T Backward"
+                description="Enhanced vim T functionality - find character after cursor and jump."/>
+        <action id="flash.repeat" class="org.yelog.ideavim.flash.RepeatAction"
+                text="Vim ;"
+                description="Enhanced vim ; functionality - Repeat latest f, t, F or T [count] times."/>
+        <action id="flash.repeat_backward" class="org.yelog.ideavim.flash.RepeatBackwardAction" text="Vim ,"
+                description="Enhanced vim , functionality - Repeat latest f, t, F or T in opposite direction."/>
     </actions>
 
 </idea-plugin>
