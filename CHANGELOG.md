@@ -4,8 +4,8 @@
 
 ## 0.1.0
 
-- fix: update selection and history when jump
 - feat: `f`, `F`, `t`, `T`, `;` and `,` motions
+- fix: update selection and history when jump
 
 ## 0.0.9
 

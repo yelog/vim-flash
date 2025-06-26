@@ -65,6 +65,11 @@ xmap f <Action>(flash.vim_f)
     ]]></description>
 
     <change-notes><![CDATA[
+        <h2>0.1.0</h2>
+        <ul>
+            <li>feat: `f`, `F`, `t`, `T`, `;` and `,` motions</li>
+            <li>fix: update selection and history when jump</li>
+        </ul>
         <h2>0.0.9</h2>
         <ul>
             <li>support auto jump when only one match</li>
