@@ -73,7 +73,7 @@ object JumpHandler : TypedActionHandler {
     // When the Enter key is pressed
     private val enterActionHandler: EditorActionHandler = object : EditorActionHandler() {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-            editor.caretModel.currentCaret.moveToOffset(lastMarks[0].offset)
+            moveToOffset(editor, lastMarks[0].offset)
             stop(editor)
             onJump?.invoke()
         }
@@ -93,32 +93,7 @@ object JumpHandler : TypedActionHandler {
                     return
                 }
 
-                val caret = editor.caretModel.currentCaret
-                if (caret.hasSelection()) {
-                    val downOffset =
-                        if (caret.selectionStart == caret.offset)
-                            caret.selectionEnd
-                        else
-                            caret.selectionStart
-                    caret.setSelection(downOffset, marks[0].offset)
-                }
-                // Shamelessly robbed from AceJump: https://github.com/acejump/AceJump/blob/99e0a5/src/main/kotlin/org/acejump/action/TagJumper.kt#L87
-                with(editor) {
-                    project?.let { project ->
-                        CommandProcessor.getInstance().executeCommand(
-                            project, {
-                                with(IdeDocumentHistory.getInstance(project)) {
-                                    setCurrentCommandHasMoves()
-                                    includeCurrentCommandAsNavigation()
-                                    includeCurrentPlaceAsChangePlace()
-                                }
-                            }, "IdeaVimFlashHistoryAppender", DocCommandGroupId.noneGroupId(document),
-                            UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION, document
-                        )
-                    }
-                }
-                caret.moveToOffset(marks[0].offset)
-
+                moveToOffset(editor, marks[0].offset)
                 stop(editor)
                 onJump?.invoke()
             }
@@ -272,5 +247,36 @@ object JumpHandler : TypedActionHandler {
             // Clear the list of highlighters after removal
             highlighters.clear()
         }
+    }
+
+    fun moveToOffset(editor: Editor, offset: Int) {
+        val caret = editor.caretModel.currentCaret
+        // If the caret has a selection, we need to adjust the selection to the new mark
+        if (caret.hasSelection()) {
+            val downOffset =
+                if (caret.selectionStart == caret.offset)
+                    caret.selectionEnd
+                else
+                    caret.selectionStart
+            caret.setSelection(downOffset, offset)
+        }
+        // Record the current command in the document history
+        // Shamelessly robbed from AceJump: https://github.com/acejump/AceJump/blob/99e0a5/src/main/kotlin/org/acejump/action/TagJumper.kt#L87
+        with(editor) {
+            project?.let { project ->
+                CommandProcessor.getInstance().executeCommand(
+                    project, {
+                        with(IdeDocumentHistory.getInstance(project)) {
+                            setCurrentCommandHasMoves()
+                            includeCurrentCommandAsNavigation()
+                            includeCurrentPlaceAsChangePlace()
+                        }
+                    }, "IdeaVimFlashHistoryAppender", DocCommandGroupId.noneGroupId(document),
+                    UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION, document
+                )
+            }
+        }
+        // Move the caret to the mark
+        caret.moveToOffset(offset)
     }
 }

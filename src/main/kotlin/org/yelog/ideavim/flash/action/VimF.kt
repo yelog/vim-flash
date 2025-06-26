@@ -89,7 +89,7 @@ class VimF : Finder {
             }
             val nextOffset = allMatches[currentMatchIndex]
             // Calculate if the caret's line is outside the visible area (vertically)
-            e.caretModel.currentCaret.moveToOffset(nextOffset)
+            JumpHandler.moveToOffset(e, nextOffset)
 //            val caretOffset = e.caretModel.offset
 
             val scrolloff = config.scrolloff
@@ -139,7 +139,7 @@ class VimF : Finder {
                 currentMatchIndex = 0
                 val closestOffset = allMatches[0]
                 val isNotInVisible = closestOffset < visibleRange.startOffset || closestOffset > visibleRange.endOffset
-                e.caretModel.currentCaret.moveToOffset(closestOffset)
+                JumpHandler.moveToOffset(e, closestOffset)
                 if (isNotInVisible) {
                     // Scroll the file so that the line with the caret is center in the visible area
                     e.scrollingModel.scrollToCaret(com.intellij.openapi.editor.ScrollType.MAKE_VISIBLE)
