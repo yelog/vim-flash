@@ -43,7 +43,7 @@ class UserConfig : PersistentStateComponent<UserConfig.DataBean> {
         const val DEFAULT_MATCH_NEAREST_FG_COLOR = 0xff1b1d2b.toInt()
         const val DEFAULT_MATCH_NEAREST_BG_COLOR = 0xffff966c.toInt()
         const val DEFAULT_LABEL_POSITION_BEFORE = false
-        const val DEFAULT_AUTO_JUMP_WHEN_SINGLE = true
+        const val DEFAULT_AUTO_JUMP_WHEN_SINGLE = false
         const val DEFAULT_SCROLL_OFF = 4
 
         // get instance
