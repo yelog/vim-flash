@@ -172,11 +172,14 @@ class VimF : Finder {
             Mode.VIM_F_ALL_BACKWARD, Mode.VIM_T_ALL_BACKWARD -> documentText.length - 1 downTo cursorOffset
             else -> return emptyList() // Should not happen
         }
-        for (i in indexRange) {
-            if (searchChars.contains(documentText[i])) {
-                matches.add(i)
+
+        indexRange
+            .filter { i -> searchChars.contains(documentText[i]) }
+            .filterNot { i ->
+                (mode.isTillBefore() && (i == 0 || documentText[i - 1] == '\n')) ||
+                        (mode.isTillAfter() && (i == documentText.length - 1 || documentText[i + 1] == '\n'))
             }
-        }
+            .forEach { matches.add(it) }
         return matches
     }
 

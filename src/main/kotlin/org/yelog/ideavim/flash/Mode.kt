@@ -42,6 +42,7 @@ enum class Mode(val char: Char) {
     }
 
     fun isTillBefore(): Boolean = this == VIM_T || this == VIM_T_ALL
+    fun isTillAfter(): Boolean = this == VIM_T_BACKWARD || this == VIM_T_ALL_BACKWARD
 
     fun toAll(): Mode {
         return when (this) {
