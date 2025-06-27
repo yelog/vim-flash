@@ -16,7 +16,7 @@
       <img src="https://github.com/user-attachments/assets/acd88f0a-d628-40ef-89e3-53ccbd3a676a" />
     </td>
     <td>
-      <img src="https://github.com/user-attachments/assets/acd88f0a-d628-40ef-89e3-53ccbd3a676a" />
+      <img src="https://github.com/user-attachments/assets/d71b93b9-180c-47e6-a8b3-6842205b7298" />
     </td>
   </tr>
 </table>
