@@ -27,12 +27,28 @@ xmap s <Action>(flash.search)
           Off course you can use other keybindings. for example <code>map <leader>s <Action>(flash.search)</code>
         </p>
 
-        <h2>Enhanced Vim F Feature</h2>
+        <h2>Enhanced Vim F/f/T/t/;/, Feature</h2>
         <p>
-          New enhanced vim f functionality similar to classic vim f command:
+        New enhanced vim F/f/T/t/;/, functionality similar to classic vim f command:
           <pre>
-nmap f <Action>(flash.vim_f)
-xmap f <Action>(flash.vim_f)
+" enhance vim f (find for char in characters to the right of the current cursor)
+nmap f <Action>(flash.find)
+xmap f <Action>(flash.find)
+" enhance vim F (find for char in characters to the left of the current cursor)
+nmap F <Action>(flash.find_backward)
+xmap F <Action>(flash.find_backward)
+" enhance vim t (till for char in characters to the right of the current cursor)
+nmap t <Action>(flash.till)
+xmap t <Action>(flash.till)
+" enhance vim T (till for char in characters to the left of the current cursor)
+nmap T <Action>(flash.till_backward)
+xmap T <Action>(flash.till_backward)
+" enhance vim ; (Repeat the last f/F/t/T search)
+nmap ; <Action>(flash.repeat)
+xmap ; <Action>(flash.repeat)
+" enhance vim , (Repeat the last f/F/t/T search backward)
+nmap , <Action>(flash.repeat_backward)
+xmap , <Action>(flash.repeat_backward)
           </pre>
           <br>
           This feature:
@@ -40,7 +56,8 @@ xmap f <Action>(flash.vim_f)
             <li>Grays out text after cursor when activated</li>
             <li>Highlights all matching characters after cursor with red background</li>
             <li>Jumps to the nearest match automatically</li>
-            <li>Press 'f' again to jump to next match</li>
+            <li>Press 'f'/'t'/';' again to jump to next match</li>
+            <li>Press 'F'/'T'/',' again to jump to privious match</li>
             <li>Press Esc or Backspace to exit search mode</li>
           </ul>
         </p>
