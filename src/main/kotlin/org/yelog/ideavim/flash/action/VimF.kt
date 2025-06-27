@@ -128,13 +128,16 @@ class VimF : Finder {
 //            val isCaretNotVisible = caretOffset < visibleRange.startOffset || caretOffset > visibleRange.endOffset
 
             if (shouldScroll) {
-                // 将当前光标所在行滚动到可视区域的最后一行
                 val caretLine = e.caretModel.logicalPosition.line
                 val targetY = e.logicalPositionToXY(com.intellij.openapi.editor.LogicalPosition(caretLine, 0)).y
                 val visibleHeight = e.scrollingModel.visibleArea.height
-                // 计算出滚动条的绝对位置。-1 是为了防止可视区域包含看不见的下一行
-                val scrollY = targetY - visibleHeight + e.lineHeight * (scrolloff + 1) - 1
-                // 设置滚动条位置
+                val scrollY = if (shouldScrollDown) {
+                    // Scroll so caret is at the bottom scrolloff+1 line
+                    targetY - visibleHeight + e.lineHeight * (scrolloff + 1) - 1
+                } else {
+                    // Scroll so caret is at the top scrolloff+1 line
+                    targetY - e.lineHeight * (scrolloff + 1) + 1
+                }
                 e.scrollingModel.scrollVertically(scrollY.coerceAtLeast(0))
             }
             // Return single mark to indicate completion but keep search active
