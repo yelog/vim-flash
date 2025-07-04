@@ -2,6 +2,10 @@
 
 # vim-flash Changelog
 
+## 0.1.1
+
+- fix: fix the issue where `<Action>` was escaped in the plugin introduction page
+
 ## 0.1.0
 
 - feat: `f`, `F`, `t`, `T`, `;` and `,` motions

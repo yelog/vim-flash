@@ -18,13 +18,13 @@
         <p>
           Add the following code to your <code>.ideavimrc</code> file.
           <pre>
-nmap s <Action>(flash.search)
-xmap s <Action>(flash.search)
+nmap s &lt;Action&gt;(flash.search)
+xmap s &lt;Action&gt;(flash.search)
           </pre>
           <br>
           Then you can use <code>s</code> and type the word you want to search for. The word will be highlighted in the editor.
           <br>
-          Off course you can use other keybindings. for example <code>map <leader>s <Action>(flash.search)</code>
+          Off course you can use other keybindings. for example <code>map &lt;leader&gt;s &lt;Action&gt;(flash.search)</code>
         </p>
 
         <h2>Enhanced Vim F/f/T/t/;/, Feature</h2>
@@ -32,23 +32,23 @@ xmap s <Action>(flash.search)
         New enhanced vim F/f/T/t/;/, functionality similar to classic vim f command:
           <pre>
 " enhance vim f (find for char in characters to the right of the current cursor)
-nmap f <Action>(flash.find)
-xmap f <Action>(flash.find)
+nmap f &lt;Action&gt;(flash.find)
+xmap f &lt;Action&gt;(flash.find)
 " enhance vim F (find for char in characters to the left of the current cursor)
-nmap F <Action>(flash.find_backward)
-xmap F <Action>(flash.find_backward)
+nmap F &lt;Action&gt;(flash.find_backward)
+xmap F &lt;Action&gt;(flash.find_backward)
 " enhance vim t (till for char in characters to the right of the current cursor)
-nmap t <Action>(flash.till)
-xmap t <Action>(flash.till)
+nmap t &lt;Action&gt;(flash.till)
+xmap t &lt;Action&gt;(flash.till)
 " enhance vim T (till for char in characters to the left of the current cursor)
-nmap T <Action>(flash.till_backward)
-xmap T <Action>(flash.till_backward)
+nmap T &lt;Action&gt;(flash.till_backward)
+xmap T &lt;Action&gt;(flash.till_backward)
 " enhance vim ; (Repeat the last f/F/t/T search)
-nmap ; <Action>(flash.repeat)
-xmap ; <Action>(flash.repeat)
+nmap ; &lt;Action&gt;(flash.repeat)
+xmap ; &lt;Action&gt;(flash.repeat)
 " enhance vim , (Repeat the last f/F/t/T search backward)
-nmap , <Action>(flash.repeat_backward)
-xmap , <Action>(flash.repeat_backward)
+nmap , &lt;Action&gt;(flash.repeat_backward)
+xmap , &lt;Action&gt;(flash.repeat_backward)
           </pre>
           <br>
           This feature:
