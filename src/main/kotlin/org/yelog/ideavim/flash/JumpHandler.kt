@@ -251,7 +251,6 @@ object JumpHandler : TypedActionHandler {
         val caret = editor.caretModel.currentCaret
         // If the caret has a selection, we need to adjust the selection to the new mark
         if (caret.hasSelection()) {
-            notify("selectionStart: " + caret.selectionStart + ", selectionEnd: " + caret.selectionEnd + ", if: " + (caret.selectionEnd > caret.offset && caret.selectionEnd < offset))
             val selectionStart =
                 if ((caret.selectionStart == caret.offset) && (abs(caret.selectionStart - caret.selectionEnd) > 1))
                     // 选区开始位置从光标之后改为光标之前，保证选区开始位置的字符不变
