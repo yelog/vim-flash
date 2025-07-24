@@ -5,6 +5,7 @@
 ## 0.1.2
 
 - fix: selection area is incorrect in visual mode [issues#66](https://github.com/yelog/vim-flash/issues/66)
+- fix: adjust text rendering for vertical alignment in MarksCanvas [issues#66](https://github.com/yelog/vim-flash/issues/66)
 
 ## 0.1.1
 

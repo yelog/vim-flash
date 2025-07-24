@@ -85,6 +85,7 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
         <h2>0.1.2</h2>
         <ul>
             <li>fix: selection area is incorrect in visual mode [issues#66](https://github.com/yelog/vim-flash/issues/66)</li>
+            <li>fix: adjust text rendering for vertical alignment in MarksCanvas #66</li>
         </ul>
         <h2>0.1.1</h2>
         <ul>

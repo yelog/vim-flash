@@ -18,7 +18,8 @@ class MarksCanvas : JComponent() {
         val visibleArea = e.scrollingModel.visibleArea
         setBounds(visibleArea.x, visibleArea.y, visibleArea.width, visibleArea.height)
         mEditor = e
-        mFont = e.colorsScheme.getFont(EditorFontType.BOLD)
+        // 获取编辑器原始文本字体
+        mFont = e.colorsScheme.getFont(EditorFontType.PLAIN)
         mFontMetrics = e.contentComponent.getFontMetrics(mFont)
     }
 
@@ -50,9 +51,10 @@ class MarksCanvas : JComponent() {
                 val bounds = mFontMetrics.getStringBounds(keyTag, g).bounds
                 // draw match text background
                 // Render each query character individually to prevent soft-wrap line breaks
+                val globalLineHeight = mEditor.lineHeight
                 for (i in 0 until it.first.charLength) {
                     mEditor.offsetToXYCompat(it.first.offset + i).let { offset ->
-                        // Get the character at the specified offset
+                        // 获取字符实际位置
                         val document = mEditor.document
                         val offsetTotal = it.first.offset + i
                         val charAtOffset = if (offsetTotal in 0 until document.textLength) {
@@ -62,7 +64,6 @@ class MarksCanvas : JComponent() {
                         }
                         val fg: Int
                         val bg: Int
-                        // If it is the first iteration of the loop
                         if (mMarks[0].offset == it.first.offset) {
                             g2d.color = Color(config.matchNearestBg, true)
                             fg = config.matchNearestFg
@@ -72,12 +73,14 @@ class MarksCanvas : JComponent() {
                             bg = config.matchBg
                         }
                         g2d.color = Color(bg, true)
-                        g2d.fillRect(offset.x - x, offset.y - y, charBounds.width, charBounds.height)
+                        // 让背景和字符都垂直居中于该行
+                        val yBase = offset.y - y + (globalLineHeight - charBounds.height) / 2
+                        g2d.fillRect(offset.x - x, yBase, charBounds.width, charBounds.height)
                         g2d.color = Color(fg, true)
                         g2d.drawString(
                             charAtOffset.toString(),
                             offset.x - x,
-                            offset.y - y + charBounds.height - mFontMetrics.descent + 2
+                            yBase + mFontMetrics.ascent
                         )
                     }
                 }
@@ -95,13 +98,14 @@ class MarksCanvas : JComponent() {
                         val tagWidth = mFontMetrics.getStringBounds(chosenTags, g).bounds.width
                         val remainTagWidth = mFontMetrics.getStringBounds(keyTag.substring(it.first.advanceIndex), g).bounds.width
                         val xInCanvas = markOffset.x - x - tagWidth - remainTagWidth
-                        val yInCanvas = markOffset.y - y + charBounds.height - mFontMetrics.descent + 2
+                        val yBase = markOffset.y - y + (globalLineHeight - bounds.height) / 2
+                        val yInCanvas = yBase + bounds.height - mFontMetrics.descent + 2
 
                         g2d.color = Color(config.labelHitBg, true)
                         // draw index background
                         g2d.fillRect(
                             xInCanvas,
-                            markOffset.y - y,
+                            yBase,
                             tagWidth,
                             bounds.height
                         )
@@ -109,26 +113,28 @@ class MarksCanvas : JComponent() {
                         g2d.drawString(
                             chosenTags,
                             xInCanvas,
-                            yInCanvas
+                            yBase + mFontMetrics.ascent
                         )
                     }
                     // wait to hit
                     // 改为在搜索字符前显示标签
                     markOffset = mEditor.offsetToXYCompat(it.first.offset)
                     xInCanvas = markOffset.x - x - mFontMetrics.getStringBounds(keyTag.substring(it.first.advanceIndex), g).bounds.width
-                    yInCanvas = markOffset.y - y + charBounds.height - mFontMetrics.descent + 2
+                    val yBase = markOffset.y - y + (globalLineHeight - bounds.height) / 2
+                    yInCanvas = yBase + bounds.height - mFontMetrics.descent + 2
                 } else {
                     if (it.first.advanceIndex > 0) {
                         // Calculate the position of the marker
                         val markOffset = mEditor.offsetToXYCompat(it.first.offset + it.first.charLength)
                         val xInCanvas = markOffset.x - x
-                        val yInCanvas = markOffset.y - y + charBounds.height - mFontMetrics.descent + 2
+                        val yBase = markOffset.y - y + (globalLineHeight - bounds.height) / 2
+                        val yInCanvas = yBase + bounds.height - mFontMetrics.descent + 2
                         val chosenTags = keyTag.substring(0, it.first.advanceIndex)
                         g2d.color = Color(config.labelHitBg, true)
                         // draw index background
                         g2d.fillRect(
                             markOffset.x - x,
-                            markOffset.y - y,
+                            yBase,
                             mFontMetrics.getStringBounds(chosenTags, g).bounds.width,
                             bounds.height
                         )
@@ -147,11 +153,12 @@ class MarksCanvas : JComponent() {
                 // remain tags
                 val remainTags = keyTag.substring(it.first.advanceIndex)
 
+                val yBase = markOffset.y - y + (globalLineHeight - bounds.height) / 2
                 g2d.color = Color(config.labelBg, true)
                 // draw index background
                 g2d.fillRect(
                     xInCanvas,
-                    markOffset.y - y,
+                    yBase,
                     mFontMetrics.getStringBounds(remainTags, g).bounds.width,
                     bounds.height
                 )
@@ -159,7 +166,7 @@ class MarksCanvas : JComponent() {
                 g2d.drawString(
                     remainTags,
                     xInCanvas,
-                    yInCanvas
+                    yBase + mFontMetrics.ascent
                 )
             }
         super.paint(g)
