@@ -17,7 +17,9 @@ import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import org.yelog.ideavim.flash.action.Finder
 import org.yelog.ideavim.flash.action.Search
 import org.yelog.ideavim.flash.action.VimF
+import org.yelog.ideavim.flash.utils.notify
 import java.awt.Color
+import kotlin.math.abs
 
 
 object JumpHandler : TypedActionHandler {
@@ -249,12 +251,30 @@ object JumpHandler : TypedActionHandler {
         val caret = editor.caretModel.currentCaret
         // If the caret has a selection, we need to adjust the selection to the new mark
         if (caret.hasSelection()) {
-            val downOffset =
-                if (caret.selectionStart == caret.offset)
-                    caret.selectionEnd
+            notify("selectionStart: " + caret.selectionStart + ", selectionEnd: " + caret.selectionEnd + ", if: " + (caret.selectionEnd > caret.offset && caret.selectionEnd < offset))
+            val selectionStart =
+                if ((caret.selectionStart == caret.offset) && (abs(caret.selectionStart - caret.selectionEnd) > 1))
+                    // 选区开始位置从光标之后改为光标之前，保证选区开始位置的字符不变
+                    if (caret.selectionEnd > caret.offset && caret.selectionEnd < offset)
+                        caret.selectionEnd - 1
+                    else
+                        caret.selectionEnd
                 else
-                    caret.selectionStart
-            caret.setSelection(downOffset, offset)
+                    // 选区开始位置从光标之前改为光标之后，保证选区开始位置的字符不变
+                    if (caret.selectionStart < caret.offset && caret.selectionStart > offset)
+                        caret.selectionStart + 1
+                    else
+                        caret.selectionStart
+
+            val selectionEnd =
+                if (((caret.selectionStart == caret.offset) && (abs(caret.selectionStart - caret.selectionEnd) > 1)) ||
+                    (caret.selectionStart < caret.offset && caret.selectionStart > offset)
+                )
+                    offset
+                else
+                    offset + 1
+
+            caret.setSelection(selectionStart, selectionEnd)
         }
         // Record the current command in the document history
         // Shamelessly robbed from AceJump: https://github.com/acejump/AceJump/blob/99e0a5/src/main/kotlin/org/acejump/action/TagJumper.kt#L87
