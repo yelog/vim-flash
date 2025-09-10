@@ -23,6 +23,8 @@ import org.yelog.ideavim.flash.action.TreesitterFinder
 import org.yelog.ideavim.flash.utils.notify
 import java.awt.Color
 import kotlin.math.abs
+import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.editor.event.DocumentEvent
 
 
 object JumpHandler : TypedActionHandler {
@@ -42,6 +44,9 @@ object JumpHandler : TypedActionHandler {
     private var remoteAwaitingReturn: Boolean = false
     private var isCanvasAdded = false
     // 记录最近一次 DataContext，用于 stopAndDispatch 透传按键
+    // --- remote offset 修正 ---
+    private var remoteDocChangeShift: Int = 0
+    private var remoteDocListenerAdded: Boolean = false
     private var lastDataContext: DataContext? = null
 
     // Record the string being currently searched
@@ -53,13 +58,31 @@ object JumpHandler : TypedActionHandler {
             if (!remoteAwaitingReturn) return
             val editor = remoteOriginEditor
             if (editor != null && remoteOriginOffset >= 0) {
+                val finalOffset = (remoteOriginOffset + remoteDocChangeShift).coerceAtLeast(0)
                 val docLen = editor.document.textLength
-                editor.caretModel.moveToOffset(remoteOriginOffset.coerceAtMost(docLen))
+                editor.caretModel.moveToOffset(finalOffset.coerceAtMost(docLen))
             }
             remoteOriginOffset = -1
             remoteOriginEditor = null
             remoteAwaitingReturn = false
+            remoteDocChangeShift = 0
+            if (remoteDocListenerAdded) {
+                editor?.document?.removeDocumentListener(remoteDocListener)
+                remoteDocListenerAdded = false
+            }
             CommandProcessor.getInstance().removeCommandListener(this)
+        }
+    }
+
+    private val remoteDocListener = object : DocumentListener {
+        override fun documentChanged(event: DocumentEvent) {
+            // 只在修改位置在原始光标之前时调整
+            if (remoteAwaitingReturn && remoteOriginOffset >= 0) {
+                if (event.offset < remoteOriginOffset) {
+                    val diff = event.newLength - event.oldLength
+                    remoteDocChangeShift += diff
+                }
+            }
         }
     }
 
@@ -117,6 +140,11 @@ object JumpHandler : TypedActionHandler {
                         remoteAwaitingReturn = true
                         remoteOriginOffset = origin
                         remoteOriginEditor = editor
+                        remoteDocChangeShift = 0
+                        if (!remoteDocListenerAdded) {
+                            editor.document.addDocumentListener(remoteDocListener)
+                            remoteDocListenerAdded = true
+                        }
                         CommandProcessor.getInstance().addCommandListener(remoteCommandListener)
                     }
                     onJump?.invoke()
