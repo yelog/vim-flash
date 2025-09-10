@@ -2,6 +2,10 @@
 
 # vim-flash Changelog
 
+## 0.1.4
+
+- feat: Add `flash.treesitter` to set visual area based on syntax
+
 ## 0.1.3
 
 - fix: other keys become immediately active in `f`, `F`, `t`, `T`, `;`, and `,` motions
