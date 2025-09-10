@@ -158,9 +158,10 @@ class VimF : Finder {
             }
 
             // If we get here, it means an unexpected character was typed
-            // Clear highlights and end the search
             clearCharHighlighters(e)
-            return emptyList()
+            // Exit VimF mode and dispatch this key to original handler (IdeaVim / editor)
+            JumpHandler.stopAndDispatch(e, c)
+            return null
         }
     }
 

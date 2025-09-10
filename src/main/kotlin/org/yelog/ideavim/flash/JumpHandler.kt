@@ -35,6 +35,8 @@ object JumpHandler : TypedActionHandler {
     private var onJump: (() -> Unit)? = null // Runnable that is called after jump
     private var lastMarks: List<MarksCanvas.Mark> = emptyList()
     private var isCanvasAdded = false
+    // 记录最近一次 DataContext，用于 stopAndDispatch 透传按键
+    private var lastDataContext: DataContext? = null
 
     // Record the string being currently searched
     private var searchString = ""
@@ -43,6 +45,8 @@ object JumpHandler : TypedActionHandler {
     private val highlighters = mutableListOf<RangeHighlighter>()
 
     override fun execute(e: Editor, c: Char, dc: DataContext) {
+        // 保存 DataContext，便于后续透传
+        lastDataContext = dc
         this.searchString += c
         val marks = finder.input(e, c, lastMarks, searchString)
         if (marks != null) {
@@ -176,6 +180,8 @@ object JumpHandler : TypedActionHandler {
             // get editor and remove the gray highlighters
             setGrayColor(editor, false, Mode.SEARCH)
         }
+        // 可选：清空 DataContext 引用
+        lastDataContext = null
     }
 
     fun setGrayColor(editor: Editor, setGray: Boolean, mode: Mode = Mode.SEARCH) {
@@ -244,6 +250,20 @@ object JumpHandler : TypedActionHandler {
             highlighters.forEach { markupModel.removeHighlighter(it) }
             // Clear the list of highlighters after removal
             highlighters.clear()
+        }
+    }
+
+    /**
+     * 退出当前模式并把本次按键交回原始 typed handler 执行
+     */
+    fun stopAndDispatch(editor: Editor, c: Char) {
+        val oldHandler = mOldTypedHandler
+        val dc = lastDataContext
+        // 正常停止（恢复所有 handler / 高亮 / 画布）
+        stop(editor)
+        // 透传按键
+        if (oldHandler != null && dc != null) {
+            oldHandler.execute(editor, c, dc)
         }
     }
 

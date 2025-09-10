@@ -82,6 +82,10 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
     ]]></description>
 
     <change-notes><![CDATA[
+        <h2>0.1.3</h2>
+        <ul>
+            <li>fix: other keys become immediately active in `f`, `F`, `t`, `T`, `;`, and `,` motions</li>
+        </ul>
         <h2>0.1.2</h2>
         <ul>
             <li>fix: selection area is incorrect in visual mode [issues#66](https://github.com/yelog/vim-flash/issues/66)</li>
