@@ -4,6 +4,7 @@ enum class Mode(val char: Char) {
     SEARCH('s'), // Search mode
     GOTO_RECENT('g'), // Go to recent position
     TREESITTER('r'), // Treesitter-like syntax range mode
+    REMOTE('m'), // Remote operator mode (operator-pending like flash.remote)
     VIM_F('f'), // Vim 'f' mode
     VIM_F_ALL('f'), // Vim 'f' mode
     VIM_F_BACKWARD('F'), // Vim 'F' mode (backward)

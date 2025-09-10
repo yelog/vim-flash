@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.command.CommandProcessor
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
@@ -35,6 +36,7 @@ object JumpHandler : TypedActionHandler {
     private var currentMode = Mode.SEARCH
     private var onJump: (() -> Unit)? = null // Runnable that is called after jump
     private var lastMarks: List<MarksCanvas.Mark> = emptyList()
+    private var remoteOriginOffset: Int = -1
     private var isCanvasAdded = false
     // 记录最近一次 DataContext，用于 stopAndDispatch 透传按键
     private var lastDataContext: DataContext? = null
@@ -87,6 +89,40 @@ object JumpHandler : TypedActionHandler {
             }
 
             (marks.size == 1 && (config.autoJumpWhenSingle || marks[0].hintMark)) -> {
+                // Remote 模式：执行远程操作（目前实现为删除整行），然后光标回到原位置
+                if (currentMode == Mode.REMOTE) {
+                    val target = marks[0]
+                    val document = editor.document
+                    val project = editor.project
+                    val line = document.getLineNumber(target.offset)
+                    val lineStart = document.getLineStartOffset(line)
+                    var lineEnd = document.getLineEndOffset(line)
+                    // 包含行尾换行
+                    if (lineEnd < document.textLength) {
+                        lineEnd += 1
+                    }
+                    val deletedLength = lineEnd - lineStart
+                    CommandProcessor.getInstance().executeCommand(
+                        project,
+                        {
+                            ApplicationManager.getApplication().runWriteAction {
+                                if (lineStart < lineEnd && lineEnd <= document.textLength) {
+                                    document.deleteString(lineStart, lineEnd)
+                                }
+                            }
+                        },
+                        "FlashRemoteDelete",
+                        null
+                    )
+                    val caret = editor.caretModel.currentCaret
+                    val newOrigin = if (remoteOriginOffset > lineStart) (remoteOriginOffset - deletedLength).coerceAtLeast(0) else remoteOriginOffset
+                    caret.moveToOffset(newOrigin.coerceAtMost(document.textLength.coerceAtLeast(0)))
+                    remoteOriginOffset = -1
+                    stop(editor)
+                    onJump?.invoke()
+                    return
+                }
+
                 // Treesitter 模式下，当只剩一个并且是语法范围时，直接选中范围
                 if (currentMode == Mode.TREESITTER && marks[0].rangeEnd > marks[0].offset) {
                     val caret = editor.caretModel.currentCaret
@@ -130,7 +166,11 @@ object JumpHandler : TypedActionHandler {
         this.searchString = ""
         this.currentMode = mode
         isStart = true
+        remoteOriginOffset = -1
         val editor = anActionEvent.getData(CommonDataKeys.EDITOR) ?: return
+        if (mode == Mode.REMOTE) {
+            remoteOriginOffset = editor.caretModel.offset
+        }
         val manager = EditorActionManager.getInstance()
         val typedAction = TypedAction.getInstance()
         mOldTypedHandler = typedAction.rawHandler
@@ -148,6 +188,7 @@ object JumpHandler : TypedActionHandler {
         finder = when (mode) {
             Mode.SEARCH -> Search()
             Mode.TREESITTER -> TreesitterFinder()
+            Mode.REMOTE -> Search()
             Mode.VIM_F -> VimF()
             Mode.VIM_F_BACKWARD -> VimF()
             Mode.VIM_T -> VimF()

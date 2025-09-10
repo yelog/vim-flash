@@ -50,6 +50,8 @@ xmap , <Action>(flash.repeat_backward)
 " syntax node expansion (flash.nvim treesitter equivalent)
 nmap S <Action>(flash.treesitter)
 xmap S <Action>(flash.treesitter)
+" remote operator (after pressing an operator like d, use r to pick target line remotely)
+omap r <Action>(flash.remote)
 ```
 
 Then you can use `s` and type the word you want to search for. The word will be highlighted in the editor.
@@ -68,6 +70,22 @@ Notes:
 - Uses IntelliJ PSI hierarchy (not an external tree-sitter parser) but mimics the flash.nvim treesitter UX.
 - If only one range remains after filtering, it is auto-selected.
 - Works in both Normal and Visual modes: in Visual mode it replaces the selection with the chosen range.
+
+### Remote Flash (operator-pending remote action)
+Map `r` in operator-pending (IdeaVim `omap`) to `<Action>(flash.remote)`. Example: `d r` (type `d` then `r`):
+1. Press an operator like `d` to enter operator-pending mode.
+2. Press `r` to start remote flash search (same UI as search mode).
+3. Type characters to filter and press a label to pick a target line.
+4. The target line is deleted while your original cursor position is restored.
+
+Current limitations:
+- Only implements delete-line behavior (remote `d`).
+- Operates within the current editor (no multi-window yet).
+- Pattern search is limited to the visible area like normal search mode.
+
+Planned improvements:
+- Support other operators (yank/change).
+- Multi-line / range remote operations.
 
 
 ## Configuration

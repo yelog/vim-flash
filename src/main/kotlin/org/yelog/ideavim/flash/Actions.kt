@@ -54,3 +54,7 @@ class RepeatBackwardAction : BaseAction() {
 class TreesitterAction : BaseAction() {
     override fun getMode() = Mode.TREESITTER
 }
+
+class RemoteAction : BaseAction() {
+    override fun getMode() = Mode.REMOTE
+}
