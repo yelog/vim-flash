@@ -65,6 +65,18 @@ class TreesitterFinder : Finder {
                 rangeEnd = end
             )
         }
+
+        // 触发后立即选中最小范围（第一个/最内层）
+        if (marks.isNotEmpty()) {
+            val first = marks[0]
+            if (first.rangeEnd > first.offset) {
+                val caret = e.caretModel.currentCaret
+                caret.removeSelection()
+                caret.setSelection(first.offset, first.rangeEnd)
+                caret.moveToOffset(first.offset)
+            }
+        }
+
         return marks
     }
 

@@ -47,11 +47,27 @@ xmap ; <Action>(flash.repeat)
 " enhance vim , (Repeat the last f/F/t/T search backward)
 nmap , <Action>(flash.repeat_backward)
 xmap , <Action>(flash.repeat_backward)
+" syntax node expansion (flash.nvim treesitter equivalent)
+nmap S <Action>(flash.treesitter)
+xmap S <Action>(flash.treesitter)
 ```
 
 Then you can use `s` and type the word you want to search for. The word will be highlighted in the editor.
 
 You can also use `f` to find a character to the right of the current cursor position, highlight all matches to the right, and press `f` again to jump to the next occurrence of that character. If you want to find a character to the left, use `F`. Similar enhancements are provided for other commands like `t`, `T`, `;`, and `,`.
+
+### Treesitter Select (syntax node expansion)
+If you map `S` to `<Action>(flash.treesitter)`, pressing `S` will:
+1. Immediately select the innermost PSI / syntax node under the cursor (identifier, parentheses group, braces block, etc.).
+2. Display letter labels (`a`-`z`) for each parent syntax range outward from the cursor.
+3. Press the label key to expand/replace the current selection with that node's full range (the same letter is shown at both the start and end of the range).
+4. Press `Esc` / `Backspace` to cancel.
+
+Notes:
+- Limited to 26 nested ranges (a-z).
+- Uses IntelliJ PSI hierarchy (not an external tree-sitter parser) but mimics the flash.nvim treesitter UX.
+- If only one range remains after filtering, it is auto-selected.
+- Works in both Normal and Visual modes: in Visual mode it replaces the selection with the chosen range.
 
 
 ## Configuration
