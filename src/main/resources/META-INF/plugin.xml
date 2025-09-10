@@ -161,6 +161,8 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
                 description="Enhanced vim ; functionality - Repeat latest f, t, F or T [count] times."/>
         <action id="flash.repeat_backward" class="org.yelog.ideavim.flash.RepeatBackwardAction" text="Vim ,"
                 description="Enhanced vim , functionality - Repeat latest f, t, F or T in opposite direction."/>
+        <action id="flash.treesitter" class="org.yelog.ideavim.flash.TreesitterAction" text="Treesitter Select"
+                description="Select syntax node ranges outward with labels (flash.nvim treesitter style)."/>
     </actions>
 
 </idea-plugin>

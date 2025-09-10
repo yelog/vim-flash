@@ -50,3 +50,7 @@ class RepeatAction : BaseAction() {
 class RepeatBackwardAction : BaseAction() {
     override fun getMode() = Mode.VIM_REPEAT_BACKWARD
 }
+
+class TreesitterAction : BaseAction() {
+    override fun getMode() = Mode.TREESITTER
+}

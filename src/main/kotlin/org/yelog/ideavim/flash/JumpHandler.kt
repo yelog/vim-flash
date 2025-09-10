@@ -17,6 +17,7 @@ import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import org.yelog.ideavim.flash.action.Finder
 import org.yelog.ideavim.flash.action.Search
 import org.yelog.ideavim.flash.action.VimF
+import org.yelog.ideavim.flash.action.TreesitterFinder
 import org.yelog.ideavim.flash.utils.notify
 import java.awt.Color
 import kotlin.math.abs
@@ -86,9 +87,19 @@ object JumpHandler : TypedActionHandler {
             }
 
             (marks.size == 1 && (config.autoJumpWhenSingle || marks[0].hintMark)) -> {
+                // Treesitter 模式下，当只剩一个并且是语法范围时，直接选中范围
+                if (currentMode == Mode.TREESITTER && marks[0].rangeEnd > marks[0].offset) {
+                    val caret = editor.caretModel.currentCaret
+                    caret.removeSelection()
+                    caret.setSelection(marks[0].offset, marks[0].rangeEnd)
+                    caret.moveToOffset(marks[0].offset)
+                    stop(editor)
+                    onJump?.invoke()
+                    return
+                }
+
                 // For VimF mode, don't stop automatically - keep waiting for 'f' key
                 if (currentMode.isVimMode()) {
-                    // The VimF already jumped to the position, just keep search active
                     return
                 }
 
@@ -136,6 +147,7 @@ object JumpHandler : TypedActionHandler {
         onJump = null
         finder = when (mode) {
             Mode.SEARCH -> Search()
+            Mode.TREESITTER -> TreesitterFinder()
             Mode.VIM_F -> VimF()
             Mode.VIM_F_BACKWARD -> VimF()
             Mode.VIM_T -> VimF()

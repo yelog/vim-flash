@@ -46,6 +46,50 @@ class MarksCanvas : JComponent() {
         mMarks.zip(coordinates)
             .sortedBy { it.second.x }
             .forEach {
+                val mark = it.first
+                // 语法范围标签（无字符高亮，只在首尾画标签）
+                if (mark.charLength == 0 && mark.rangeEnd > mark.offset) {
+                    val keyTag = mark.keyTag
+                    val bounds = mFontMetrics.getStringBounds(keyTag, g).bounds
+                    val globalLineHeight = mEditor.lineHeight
+
+                    // 起点标签
+                    val startXY = mEditor.offsetToXYCompat(mark.offset)
+                    val startYBase = startXY.y - y + (globalLineHeight - bounds.height) / 2
+                    g2d.color = Color(config.labelBg, true)
+                    g2d.fillRect(
+                        startXY.x - x,
+                        startYBase,
+                        bounds.width,
+                        bounds.height
+                    )
+                    g2d.color = Color(config.labelFg, true)
+                    g2d.drawString(
+                        keyTag,
+                        startXY.x - x,
+                        startYBase + mFontMetrics.ascent
+                    )
+
+                    // 终点标签（放在 rangeEnd - 1 字符处）
+                    val endPos = (mark.rangeEnd - 1).coerceAtLeast(mark.offset)
+                    val endXY = mEditor.offsetToXYCompat(endPos)
+                    val endYBase = endXY.y - y + (globalLineHeight - bounds.height) / 2
+                    g2d.color = Color(config.labelBg, true)
+                    g2d.fillRect(
+                        endXY.x - x,
+                        endYBase,
+                        bounds.width,
+                        bounds.height
+                    )
+                    g2d.color = Color(config.labelFg, true)
+                    g2d.drawString(
+                        keyTag,
+                        endXY.x - x,
+                        endYBase + mFontMetrics.ascent
+                    )
+                    return@forEach
+                }
+
                 val keyTag = it.first.keyTag
                 val charBounds = mFontMetrics.getStringBounds("x", g).bounds
                 val bounds = mFontMetrics.getStringBounds(keyTag, g).bounds
@@ -178,5 +222,6 @@ class MarksCanvas : JComponent() {
         val charLength: Int = 0,
         val advanceIndex: Int = 0,
         val hintMark: Boolean = false,
+        val rangeEnd: Int = -1, // 语法范围结束（不包含），-1 表示无
     )
 }
