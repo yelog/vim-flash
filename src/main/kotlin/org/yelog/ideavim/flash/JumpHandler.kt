@@ -5,7 +5,8 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.command.CommandProcessor
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.command.CommandListener
+import com.intellij.openapi.command.CommandEvent
 import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
@@ -37,12 +38,30 @@ object JumpHandler : TypedActionHandler {
     private var onJump: (() -> Unit)? = null // Runnable that is called after jump
     private var lastMarks: List<MarksCanvas.Mark> = emptyList()
     private var remoteOriginOffset: Int = -1
+    private var remoteOriginEditor: Editor? = null
+    private var remoteAwaitingReturn: Boolean = false
     private var isCanvasAdded = false
     // 记录最近一次 DataContext，用于 stopAndDispatch 透传按键
     private var lastDataContext: DataContext? = null
 
     // Record the string being currently searched
     private var searchString = ""
+
+    // 监听下一次命令结束后把光标恢复到原位置
+    private val remoteCommandListener = object : CommandListener {
+        override fun commandFinished(event: CommandEvent) {
+            if (!remoteAwaitingReturn) return
+            val editor = remoteOriginEditor
+            if (editor != null && remoteOriginOffset >= 0) {
+                val docLen = editor.document.textLength
+                editor.caretModel.moveToOffset(remoteOriginOffset.coerceAtMost(docLen))
+            }
+            remoteOriginOffset = -1
+            remoteOriginEditor = null
+            remoteAwaitingReturn = false
+            CommandProcessor.getInstance().removeCommandListener(this)
+        }
+    }
 
     // List to keep track of the added highlighters
     private val highlighters = mutableListOf<RangeHighlighter>()
@@ -89,36 +108,17 @@ object JumpHandler : TypedActionHandler {
             }
 
             (marks.size == 1 && (config.autoJumpWhenSingle || marks[0].hintMark)) -> {
-                // Remote 模式：执行远程操作（目前实现为删除整行），然后光标回到原位置
+                // Remote 模式下：只移动到目标位置并退出远程查找，等待接下来的操作命令（如 d / y / c 或文本对象）
                 if (currentMode == Mode.REMOTE) {
-                    val target = marks[0]
-                    val document = editor.document
-                    val project = editor.project
-                    val line = document.getLineNumber(target.offset)
-                    val lineStart = document.getLineStartOffset(line)
-                    var lineEnd = document.getLineEndOffset(line)
-                    // 包含行尾换行
-                    if (lineEnd < document.textLength) {
-                        lineEnd += 1
-                    }
-                    val deletedLength = lineEnd - lineStart
-                    CommandProcessor.getInstance().executeCommand(
-                        project,
-                        {
-                            ApplicationManager.getApplication().runWriteAction {
-                                if (lineStart < lineEnd && lineEnd <= document.textLength) {
-                                    document.deleteString(lineStart, lineEnd)
-                                }
-                            }
-                        },
-                        "FlashRemoteDelete",
-                        null
-                    )
-                    val caret = editor.caretModel.currentCaret
-                    val newOrigin = if (remoteOriginOffset > lineStart) (remoteOriginOffset - deletedLength).coerceAtLeast(0) else remoteOriginOffset
-                    caret.moveToOffset(newOrigin.coerceAtMost(document.textLength.coerceAtLeast(0)))
-                    remoteOriginOffset = -1
+                    val origin = remoteOriginOffset
+                    moveToOffset(editor, marks[0].offset)
                     stop(editor)
+                    if (origin >= 0) {
+                        remoteAwaitingReturn = true
+                        remoteOriginOffset = origin
+                        remoteOriginEditor = editor
+                        CommandProcessor.getInstance().addCommandListener(remoteCommandListener)
+                    }
                     onJump?.invoke()
                     return
                 }
@@ -170,6 +170,8 @@ object JumpHandler : TypedActionHandler {
         val editor = anActionEvent.getData(CommonDataKeys.EDITOR) ?: return
         if (mode == Mode.REMOTE) {
             remoteOriginOffset = editor.caretModel.offset
+            remoteOriginEditor = editor
+            remoteAwaitingReturn = false
         }
         val manager = EditorActionManager.getInstance()
         val typedAction = TypedAction.getInstance()

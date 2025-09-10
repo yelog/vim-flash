@@ -4,7 +4,7 @@ object KeyTagsGenerator {
     // maybe has a math method
     fun createTagsTree(targetCount: Int, keys: String): List<String> {
         val res: MutableList<String> = ArrayList()
-        recur(targetCount, keys, "", res)
+        recur(targetCount, keys, "", res, )
         return res
     }
 
