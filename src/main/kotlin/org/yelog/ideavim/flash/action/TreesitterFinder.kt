@@ -51,9 +51,9 @@ class TreesitterFinder : Finder {
         }
         if (ranges.isEmpty()) return emptyList()
 
-        // 从内到外，限制 26 层
-        val limited = ranges.take(min(26, ranges.size))
-        val letters = ('a'..'z').toList()
+        // 从内到外，限制层数（去掉 y/c/d/x/s 以避免与常用操作命令冲突）
+        val letters = ('a'..'z').filter { it !in setOf('y', 'c', 'd', 'x', 's') }
+        val limited = ranges.take(min(letters.size, ranges.size))
 
         marks = limited.mapIndexed { index, (start, end) ->
             MarksCanvas.Mark(

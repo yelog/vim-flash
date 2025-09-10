@@ -92,8 +92,21 @@ object JumpHandler : TypedActionHandler {
     override fun execute(e: Editor, c: Char, dc: DataContext) {
         // 保存 DataContext，便于后续透传
         lastDataContext = dc
-        this.searchString += c
+
+        // Treesitter 模式不累加 searchString，以便非 label 按键直接透传
+        if (currentMode != Mode.TREESITTER) {
+            this.searchString += c
+        }
+
+        val previousMarks = lastMarks
         val marks = finder.input(e, c, lastMarks, searchString)
+
+        // Treesitter 模式：输入的按键不是任何 label，则直接退出并透传该按键
+        if (currentMode == Mode.TREESITTER && marks != null && marks === previousMarks) {
+            stopAndDispatch(e, c)
+            return
+        }
+
         if (marks != null) {
             lastMarks = marks
             jumpOrShowCanvas(e, lastMarks)
