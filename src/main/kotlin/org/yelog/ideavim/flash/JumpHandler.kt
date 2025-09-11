@@ -1,30 +1,32 @@
 package org.yelog.ideavim.flash
 
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.actionSystem.IdeActions
-import com.intellij.openapi.command.CommandProcessor
-import com.intellij.openapi.command.CommandListener
 import com.intellij.openapi.command.CommandEvent
+import com.intellij.openapi.command.CommandListener
+import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.*
+import com.intellij.openapi.editor.event.DocumentEvent
+import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
+import com.intellij.openapi.util.Disposer
 import org.yelog.ideavim.flash.action.Finder
 import org.yelog.ideavim.flash.action.Search
-import org.yelog.ideavim.flash.action.VimF
 import org.yelog.ideavim.flash.action.TreesitterFinder
+import org.yelog.ideavim.flash.action.VimF
 import org.yelog.ideavim.flash.utils.notify
 import java.awt.Color
 import kotlin.math.abs
-import com.intellij.openapi.editor.event.DocumentListener
-import com.intellij.openapi.editor.event.DocumentEvent
 
 
 object JumpHandler : TypedActionHandler {
@@ -43,11 +45,13 @@ object JumpHandler : TypedActionHandler {
     private var remoteOriginEditor: Editor? = null
     private var remoteAwaitingReturn: Boolean = false
     private var isCanvasAdded = false
+
     // 记录最近一次 DataContext，用于 stopAndDispatch 透传按键
     // --- remote offset 修正 ---
     private var remoteDocChangeShift: Int = 0
     private var remoteDocListenerAdded: Boolean = false
     private var lastDataContext: DataContext? = null
+    private var remoteCommandListenerDisposable: Disposable? = null
 
     // Record the string being currently searched
     private var searchString = ""
@@ -70,7 +74,16 @@ object JumpHandler : TypedActionHandler {
                 editor?.document?.removeDocumentListener(remoteDocListener)
                 remoteDocListenerAdded = false
             }
-            unregisterCommandListener(this)
+            if (remoteCommandListenerDisposable != null) {
+                try {
+                    Disposer.dispose(remoteCommandListenerDisposable!!)
+                } catch (_: Throwable) {
+                } finally {
+                    remoteCommandListenerDisposable = null
+                }
+            } else {
+                unregisterCommandListener(this)
+            }
         }
     }
 
@@ -98,6 +111,36 @@ object JumpHandler : TypedActionHandler {
             // 旧版本平台无此方法，忽略（可能会有微小泄漏，但频率极低）
         } catch (t: Throwable) {
             notify("unregisterCommandListener error: ${t.message}")
+        }
+    }
+
+    /**
+     * 通过反射优先调用 addCommandListener(listener, disposable) 新签名；若不存在则回退旧签名。
+     */
+    private fun registerCommandListener(listener: CommandListener) {
+        val cp = CommandProcessor.getInstance()
+        try {
+            val methodNew = cp.javaClass.getMethod(
+                "addCommandListener",
+                CommandListener::class.java,
+                Disposable::class.java
+            )
+            val disposable = Disposer.newDisposable("vim-flash-remote-command")
+            methodNew.invoke(cp, listener, disposable)
+            remoteCommandListenerDisposable = disposable
+            return
+        } catch (_: NoSuchMethodException) {
+            // ignore, fallback
+        } catch (t: Throwable) {
+            notify("registerCommandListener(new) error: ${t.message}")
+        }
+
+        // fallback old
+        try {
+            val oldMethod = cp.javaClass.getMethod("addCommandListener", CommandListener::class.java)
+            oldMethod.invoke(cp, listener)
+        } catch (t: Throwable) {
+            notify("registerCommandListener(old) error: ${t.message}")
         }
     }
 
@@ -173,7 +216,7 @@ object JumpHandler : TypedActionHandler {
                             editor.document.addDocumentListener(remoteDocListener)
                             remoteDocListenerAdded = true
                         }
-                        CommandProcessor.getInstance().addCommandListener(remoteCommandListener)
+                        registerCommandListener(remoteCommandListener)
                     }
                     onJump?.invoke()
                     return
@@ -384,13 +427,13 @@ object JumpHandler : TypedActionHandler {
         if (caret.hasSelection()) {
             val selectionStart =
                 if ((caret.selectionStart == caret.offset) && (abs(caret.selectionStart - caret.selectionEnd) > 1))
-                    // 选区开始位置从光标之后改为光标之前，保证选区开始位置的字符不变
+                // 选区开始位置从光标之后改为光标之前，保证选区开始位置的字符不变
                     if (caret.selectionEnd > caret.offset && caret.selectionEnd < offset)
                         caret.selectionEnd - 1
                     else
                         caret.selectionEnd
                 else
-                    // 选区开始位置从光标之前改为光标之后，保证选区开始位置的字符不变
+                // 选区开始位置从光标之前改为光标之后，保证选区开始位置的字符不变
                     if (caret.selectionStart < caret.offset && caret.selectionStart > offset)
                         caret.selectionStart + 1
                     else
