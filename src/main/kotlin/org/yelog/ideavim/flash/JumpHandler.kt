@@ -70,7 +70,7 @@ object JumpHandler : TypedActionHandler {
                 editor?.document?.removeDocumentListener(remoteDocListener)
                 remoteDocListenerAdded = false
             }
-            CommandProcessor.getInstance().removeCommandListener(this)
+            unregisterCommandListener(this)
         }
     }
 
@@ -83,6 +83,21 @@ object JumpHandler : TypedActionHandler {
                     remoteDocChangeShift += diff
                 }
             }
+        }
+    }
+
+    /**
+     * 通过反射安全调用 removeCommandListener，避免在旧平台 (无该方法) 上抛出 NoSuchMethodError
+     */
+    private fun unregisterCommandListener(listener: CommandListener) {
+        val cp = CommandProcessor.getInstance()
+        try {
+            val method = cp.javaClass.getMethod("removeCommandListener", CommandListener::class.java)
+            method.invoke(cp, listener)
+        } catch (_: NoSuchMethodException) {
+            // 旧版本平台无此方法，忽略（可能会有微小泄漏，但频率极低）
+        } catch (t: Throwable) {
+            notify("unregisterCommandListener error: ${t.message}")
         }
     }
 
