@@ -5,6 +5,7 @@
 ## 0.1.4
 
 - feat: Add `flash.treesitter` to set visual area based on syntax
+- feat: Add `flash.remote` to jump to a remote line after pressing an operator like `d`
 
 ## 0.1.3
 
