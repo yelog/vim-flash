@@ -82,6 +82,11 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
     ]]></description>
 
     <change-notes><![CDATA[
+        <h2>0.1.5</h2>
+        <ul>
+            <li>fix: register document listeners with disposables to avoid deprecated API usage on 253</li>
+            <li>chore: bump plugin version to 0.1.5</li>
+        </ul>
         <h2>0.1.4</h2>
         <ul>
             <li>feat: Add `flash.treesitter` to set visual area based on syntax</li>

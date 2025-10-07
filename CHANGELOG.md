@@ -2,6 +2,10 @@
 
 # vim-flash Changelog
 
+## 0.1.5
+
+- fix: register document listeners with disposables to avoid deprecated API usage on 253 builds
+
 ## 0.1.4
 
 - feat: Add `flash.treesitter` to set visual area based on syntax

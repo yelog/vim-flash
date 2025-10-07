@@ -10,6 +10,7 @@ import com.intellij.openapi.command.CommandListener
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.editor.Caret
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.*
 import com.intellij.openapi.editor.event.DocumentEvent
@@ -50,6 +51,7 @@ object JumpHandler : TypedActionHandler {
     // --- remote offset 修正 ---
     private var remoteDocChangeShift: Int = 0
     private var remoteDocListenerAdded: Boolean = false
+    private var remoteDocListenerDisposable: Disposable? = null
     private var lastDataContext: DataContext? = null
     private var remoteCommandListenerDisposable: Disposable? = null
 
@@ -71,8 +73,7 @@ object JumpHandler : TypedActionHandler {
             remoteAwaitingReturn = false
             remoteDocChangeShift = 0
             if (remoteDocListenerAdded) {
-                editor?.document?.removeDocumentListener(remoteDocListener)
-                remoteDocListenerAdded = false
+                editor?.document?.let { detachRemoteDocumentListener(it) }
             }
             if (remoteCommandListenerDisposable != null) {
                 try {
@@ -96,6 +97,72 @@ object JumpHandler : TypedActionHandler {
                     remoteDocChangeShift += diff
                 }
             }
+        }
+    }
+
+    private fun attachRemoteDocumentListener(document: Document): Boolean {
+        return try {
+            remoteDocListenerDisposable = registerRemoteDocumentListener(document)
+            true
+        } catch (_: Throwable) {
+            remoteDocListenerDisposable = null
+            false
+        }
+    }
+
+    private fun registerRemoteDocumentListener(document: Document): Disposable? {
+        return try {
+            val methodNew = document.javaClass.getMethod(
+                "addDocumentListener",
+                DocumentListener::class.java,
+                Disposable::class.java
+            )
+            val disposable = Disposer.newDisposable("vim-flash-remote-doc")
+            try {
+                methodNew.invoke(document, remoteDocListener, disposable)
+                disposable
+            } catch (t: Throwable) {
+                try {
+                    Disposer.dispose(disposable)
+                } catch (_: Throwable) {
+                }
+                throw t
+            }
+        } catch (_: NoSuchMethodException) {
+            try {
+                val methodOld = document.javaClass.getMethod("addDocumentListener", DocumentListener::class.java)
+                methodOld.invoke(document, remoteDocListener)
+            } catch (t: Throwable) {
+                notify("addDocumentListener(old) error: ${t.message}")
+                throw t
+            }
+            null
+        } catch (t: Throwable) {
+            notify("addDocumentListener(new) error: ${t.message}")
+            throw t
+        }
+    }
+
+    private fun detachRemoteDocumentListener(document: Document) {
+        try {
+            val disposable = remoteDocListenerDisposable
+            if (disposable != null) {
+                remoteDocListenerDisposable = null
+                try {
+                    Disposer.dispose(disposable)
+                } catch (t: Throwable) {
+                    notify("dispose document listener error: ${t.message}")
+                }
+                return
+            }
+            val method = document.javaClass.getMethod("removeDocumentListener", DocumentListener::class.java)
+            method.invoke(document, remoteDocListener)
+        } catch (_: NoSuchMethodException) {
+            // Platforms that rely solely on parent disposables
+        } catch (t: Throwable) {
+            notify("removeDocumentListener error: ${t.message}")
+        } finally {
+            remoteDocListenerAdded = false
         }
     }
 
@@ -213,8 +280,7 @@ object JumpHandler : TypedActionHandler {
                         remoteOriginEditor = editor
                         remoteDocChangeShift = 0
                         if (!remoteDocListenerAdded) {
-                            editor.document.addDocumentListener(remoteDocListener)
-                            remoteDocListenerAdded = true
+                            remoteDocListenerAdded = attachRemoteDocumentListener(editor.document)
                         }
                         registerCommandListener(remoteCommandListener)
                     }
