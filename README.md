@@ -35,6 +35,8 @@
 
 ## Usage
 
+Search for the plugin name `vim-flash` in the plugin marketplace, then install it.
+
 Add the following code to your `.ideavimrc` file.
 
 ```vim
