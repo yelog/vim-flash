@@ -2,6 +2,10 @@
 
 # vim-flash Changelog
 
+## 1.0.1
+
+- feat: `flash.search` is now available when using split screens; enabled by default and can be controlled in settings via `Search across splits`
+
 ## 1.0.0
 
 Most of the intended features have already been implemented. This marks the official release, with the version number changed to 1.0.0.
