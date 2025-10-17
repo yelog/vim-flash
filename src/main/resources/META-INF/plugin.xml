@@ -82,6 +82,11 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
     ]]></description>
 
     <change-notes><![CDATA[
+        <h2>1.0.0</h2>
+        <ul>
+            <li>feat: Changed the color setting in the settings interface from text input to a color picker</li>
+            <li>feat: All configuration options in the settings interface now support resetting to default values</li>
+        </ul>
         <h2>0.1.5</h2>
         <ul>
             <li>fix: register document listeners with disposables to avoid deprecated API usage on 253</li>

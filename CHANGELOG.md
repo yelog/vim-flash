@@ -7,6 +7,7 @@
 Most of the intended features have already been implemented. This marks the official release, with the version number changed to 1.0.0.
 
 - feat: Changed the color setting in the settings interface from text input to a color picker
+- feat: All configuration options in the settings interface now support resetting to default values
 
 ## 0.1.5
 
