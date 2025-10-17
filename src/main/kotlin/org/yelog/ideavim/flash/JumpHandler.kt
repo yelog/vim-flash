@@ -27,6 +27,8 @@ import org.yelog.ideavim.flash.action.TreesitterFinder
 import org.yelog.ideavim.flash.action.VimF
 import org.yelog.ideavim.flash.utils.notify
 import java.awt.Color
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.TextEditor
 import kotlin.math.abs
 
 
@@ -36,7 +38,7 @@ object JumpHandler : TypedActionHandler {
     private var mOldEscActionHandler: EditorActionHandler? = null
     private var mOldBackSpaceActionHandler: EditorActionHandler? = null
     private var mOldEnterActionHandler: EditorActionHandler? = null
-    private val mMarksCanvas = MarksCanvas()
+    private val canvasMap = mutableMapOf<Editor, MarksCanvas>()
     private var isStart = false
     private lateinit var finder: Finder
     private var currentMode = Mode.SEARCH
@@ -211,8 +213,8 @@ object JumpHandler : TypedActionHandler {
         }
     }
 
-    // List to keep track of the added highlighters
-    private val highlighters = mutableListOf<RangeHighlighter>()
+    // Map: 每个编辑器对应其灰色高亮列表
+    private val highlightersMap = mutableMapOf<Editor, MutableList<RangeHighlighter>>()
 
     override fun execute(e: Editor, c: Char, dc: DataContext) {
         // 保存 DataContext，便于后续透传
@@ -269,18 +271,20 @@ object JumpHandler : TypedActionHandler {
             }
 
             (marks.size == 1 && (config.autoJumpWhenSingle || marks[0].hintMark)) -> {
-                // Remote 模式下：只移动到目标位置并退出远程查找，等待接下来的操作命令（如 d / y / c 或文本对象）
+                val targetEditor = marks[0].sourceEditor ?: editor
+
+                // Remote 模式
                 if (currentMode == Mode.REMOTE) {
                     val origin = remoteOriginOffset
-                    moveToOffset(editor, marks[0].offset)
-                    stop(editor)
+                    moveToOffset(targetEditor, marks[0].offset)
+                    stop(targetEditor)
                     if (origin >= 0) {
                         remoteAwaitingReturn = true
                         remoteOriginOffset = origin
-                        remoteOriginEditor = editor
+                        remoteOriginEditor = targetEditor
                         remoteDocChangeShift = 0
                         if (!remoteDocListenerAdded) {
-                            remoteDocListenerAdded = attachRemoteDocumentListener(editor.document)
+                            remoteDocListenerAdded = attachRemoteDocumentListener(targetEditor.document)
                         }
                         registerCommandListener(remoteCommandListener)
                     }
@@ -288,35 +292,46 @@ object JumpHandler : TypedActionHandler {
                     return
                 }
 
-                // Treesitter 模式下，当只剩一个并且是语法范围时，直接选中范围
+                // Treesitter 范围
                 if (currentMode == Mode.TREESITTER && marks[0].rangeEnd > marks[0].offset) {
-                    val caret = editor.caretModel.currentCaret
+                    val caret = targetEditor.caretModel.currentCaret
                     caret.removeSelection()
                     caret.setSelection(marks[0].offset, marks[0].rangeEnd)
                     caret.moveToOffset(marks[0].offset)
-                    stop(editor)
+                    stop(targetEditor)
                     onJump?.invoke()
                     return
                 }
 
-                // For VimF mode, don't stop automatically - keep waiting for 'f' key
+                // VimF 保持
                 if (currentMode.isVimMode()) {
                     return
                 }
 
-                moveToOffset(editor, marks[0].offset)
-                stop(editor)
+                moveToOffset(targetEditor, marks[0].offset)
+                targetEditor.contentComponent.requestFocus()
+                stop(targetEditor)
                 onJump?.invoke()
             }
 
             else -> {
-                if (!isCanvasAdded) {
-                    mMarksCanvas.sync(editor)
-                    editor.contentComponent.add(mMarksCanvas)
+                // 跨分屏显示
+                if (currentMode == Mode.SEARCH && config.searchAcrossSplits && marks.any { it.sourceEditor != null }) {
+                    val grouped = marks.groupBy { it.sourceEditor ?: editor }
+                    // 为每个编辑器创建或更新 canvas
+                    grouped.forEach { (ed, ms) ->
+                        val canvas = canvasMap.getOrPut(ed) { MarksCanvas().apply { sync(ed); ed.contentComponent.add(this) } }
+                        canvas.sync(ed)
+                        canvas.setData(ms, this.searchString)
+                        ed.contentComponent.repaint()
+                    }
+                } else {
+                    // 旧逻辑：只在当前编辑器添加单画布
+                    val canvas = canvasMap.getOrPut(editor) { MarksCanvas().apply { sync(editor); editor.contentComponent.add(this) } }
+                    canvas.sync(editor)
+                    canvas.setData(marks, this.searchString)
                     editor.contentComponent.repaint()
-                    isCanvasAdded = true
                 }
-                mMarksCanvas.setData(marks, this.searchString)
             }
         }
     }
@@ -387,11 +402,15 @@ object JumpHandler : TypedActionHandler {
             if (mOldEnterActionHandler != null) {
                 manager.setActionHandler(IdeActions.ACTION_EDITOR_ENTER, mOldEnterActionHandler!!)
             }
-            val parent = mMarksCanvas.parent
-            if (parent != null) {
-                parent.remove(mMarksCanvas)
-                parent.repaint()
+            // 移除所有画布
+            canvasMap.forEach { (ed, canvas) ->
+                val parent = canvas.parent
+                if (parent != null) {
+                    parent.remove(canvas)
+                    parent.repaint()
+                }
             }
+            canvasMap.clear()
             isCanvasAdded = false
             // Clean up finder-specific resources like highlighters
             if (::finder.isInitialized) {
@@ -405,71 +424,79 @@ object JumpHandler : TypedActionHandler {
     }
 
     fun setGrayColor(editor: Editor, setGray: Boolean, mode: Mode = Mode.SEARCH) {
+        val cfg = config
         if (setGray) {
-            // Set gray color of text
-            val startOffset: Int
-            val endOffset: Int
-
-            when (mode) {
-                Mode.VIM_F, Mode.VIM_T -> {
-                    // For vim f mode, gray out text after cursor
-                    val cursorOffset = editor.caretModel.offset
-                    startOffset = cursorOffset + 1
-                    endOffset = editor.document.textLength
+            // 需要处理的编辑器集合：搜索模式并且开启跨分屏时，灰显所有 TextEditor；否则仅当前 editor
+            val editors: List<Editor> =
+                if (mode == Mode.SEARCH && cfg.searchAcrossSplits) {
+                    val project = editor.project
+                    if (project != null) {
+                        FileEditorManager.getInstance(project).allEditors
+                            .filterIsInstance<TextEditor>()
+                            .map { it.editor }
+                            .ifEmpty { listOf(editor) }
+                    } else {
+                        listOf(editor)
+                    }
+                } else {
+                    listOf(editor)
                 }
 
-                Mode.VIM_F_BACKWARD, Mode.VIM_T_BACKWARD -> {
-                    // For vim F mode, gray out text before cursor
-                    val cursorOffset = editor.caretModel.offset
-                    startOffset = 0
-                    endOffset = cursorOffset - 1
+            editors.forEach { ed ->
+                val (startOffset, endOffset) = when (mode) {
+                    Mode.VIM_F, Mode.VIM_T -> {
+                        val cursorOffset = ed.caretModel.offset
+                        cursorOffset + 1 to ed.document.textLength
+                    }
+                    Mode.VIM_F_BACKWARD, Mode.VIM_T_BACKWARD -> {
+                        val cursorOffset = ed.caretModel.offset
+                        0 to (cursorOffset - 1).coerceAtLeast(0)
+                    }
+                    Mode.VIM_F_ALL, Mode.VIM_F_ALL_BACKWARD, Mode.VIM_T_ALL, Mode.VIM_T_ALL_BACKWARD -> {
+                        0 to ed.document.textLength
+                    }
+                    else -> {
+                        val visibleArea = ed.scrollingModel.visibleArea
+                        val startLogicalPosition = ed.xyToLogicalPosition(visibleArea.location)
+                        val endLogicalPosition = ed.xyToLogicalPosition(
+                            visibleArea.location.apply {
+                                this.x += visibleArea.width
+                                this.y += visibleArea.height
+                            }
+                        )
+                        ed.logicalPositionToOffset(startLogicalPosition) to ed.logicalPositionToOffset(endLogicalPosition)
+                    }
                 }
 
-                Mode.VIM_F_ALL, Mode.VIM_F_ALL_BACKWARD, Mode.VIM_T_ALL, Mode.VIM_T_ALL_BACKWARD -> {
-                    // For vim f all mode, gray out all text
-                    startOffset = 0
-                    endOffset = editor.document.textLength
-                }
-
-                else -> {
-                    // For search modes, gray out all visible text
-                    val visibleArea = editor.scrollingModel.visibleArea
-                    val startLogicalPosition = editor.xyToLogicalPosition(visibleArea.location)
-                    val endLogicalPosition = editor.xyToLogicalPosition(
-                        visibleArea.location.apply {
-                            this.x += visibleArea.width
-                            this.y += visibleArea.height
-                        }
+                if (startOffset < endOffset) {
+                    val grayAttributes = TextAttributes().apply {
+                        foregroundColor = Color.GRAY
+                    }
+                    val markupModel = ed.markupModel
+                    val highlighter = markupModel.addRangeHighlighter(
+                        startOffset,
+                        endOffset,
+                        HighlighterLayer.SELECTION - 1,
+                        grayAttributes,
+                        HighlighterTargetArea.EXACT_RANGE
                     )
-                    startOffset = editor.logicalPositionToOffset(startLogicalPosition)
-                    endOffset = editor.logicalPositionToOffset(endLogicalPosition)
+                    val list = highlightersMap.getOrPut(ed) { mutableListOf() }
+                    list.add(highlighter)
                 }
             }
-
-            if (startOffset < endOffset) {
-                val grayAttributes = TextAttributes().apply {
-                    foregroundColor = Color.GRAY
-                }
-
-                val markupModel = editor.markupModel
-                val highlighter = markupModel.addRangeHighlighter(
-                    startOffset,
-                    endOffset,
-                    HighlighterLayer.SELECTION - 1,
-                    grayAttributes,
-                    HighlighterTargetArea.EXACT_RANGE
-                )
-
-                // Store the highlighter for later removal
-                highlighters.add(highlighter)
-            }
-
         } else {
-            val markupModel = editor.markupModel
-            // Remove each highlighter that was previously added
-            highlighters.forEach { markupModel.removeHighlighter(it) }
-            // Clear the list of highlighters after removal
-            highlighters.clear()
+            // 移除所有相关编辑器的灰显（跨分屏时全部移除）
+            val editors = if (mode == Mode.SEARCH && cfg.searchAcrossSplits) {
+                highlightersMap.keys.toList()
+            } else {
+                listOf(editor)
+            }
+            editors.forEach { ed ->
+                highlightersMap.remove(ed)?.let { list ->
+                    val markupModel = ed.markupModel
+                    list.forEach { markupModel.removeHighlighter(it) }
+                }
+            }
         }
     }
 

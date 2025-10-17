@@ -223,5 +223,6 @@ class MarksCanvas : JComponent() {
         val advanceIndex: Int = 0,
         val hintMark: Boolean = false,
         val rangeEnd: Int = -1, // 语法范围结束（不包含），-1 表示无
+        val sourceEditor: Editor? = null // 分屏来源编辑器
     )
 }

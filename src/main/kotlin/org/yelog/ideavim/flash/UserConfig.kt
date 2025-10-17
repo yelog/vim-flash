@@ -30,6 +30,7 @@ class UserConfig : PersistentStateComponent<UserConfig.DataBean> {
         var labelBeforeMatch = DEFAULT_LABEL_POSITION_BEFORE
         var autoJumpWhenSingle = DEFAULT_AUTO_JUMP_WHEN_SINGLE
         var scrolloff = DEFAULT_SCROLL_OFF
+        var searchAcrossSplits = DEFAULT_SEARCH_ACROSS_SPLITS
     }
 
     companion object {
@@ -45,6 +46,7 @@ class UserConfig : PersistentStateComponent<UserConfig.DataBean> {
         const val DEFAULT_LABEL_POSITION_BEFORE = false
         const val DEFAULT_AUTO_JUMP_WHEN_SINGLE = false
         const val DEFAULT_SCROLL_OFF = 4
+        const val DEFAULT_SEARCH_ACROSS_SPLITS = true
 
         // get instance
         private fun getInstance(): UserConfig {

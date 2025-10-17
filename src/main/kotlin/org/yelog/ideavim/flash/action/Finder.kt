@@ -28,7 +28,15 @@ interface Finder {
     fun advanceMarks(c: Char, marks: List<MarksCanvas.Mark>): List<MarksCanvas.Mark> {
         return marks.filter { it.keyTag[it.advanceIndex] == c }
             .map {
-                MarksCanvas.Mark(it.keyTag, it.offset, it.charLength, it.advanceIndex + 1, true)
+                MarksCanvas.Mark(
+                    keyTag = it.keyTag,
+                    offset = it.offset,
+                    charLength = it.charLength,
+                    advanceIndex = it.advanceIndex + 1,
+                    hintMark = true,
+                    rangeEnd = it.rangeEnd,
+                    sourceEditor = it.sourceEditor
+                )
             }
             .toList()
     }

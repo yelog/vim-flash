@@ -26,6 +26,7 @@ class ConfigUI {
     private lateinit var labelBeforeMatchCB: javax.swing.JCheckBox // Added for form binding
     private lateinit var autoJumpWhenSingleCB: javax.swing.JCheckBox // Added for form binding
     private lateinit var scrolloffTF:  JTextField // Added for form binding
+    private lateinit var searchAcrossSplitsCB: javax.swing.JCheckBox
 
     // Reset labels
     private lateinit var charactersResetLB: JLabel
@@ -35,6 +36,7 @@ class ConfigUI {
     private lateinit var matchNearestColorResetLB: JLabel
     private lateinit var labelPositionResetLB: JLabel
     private lateinit var autoJumpResetLB: JLabel
+    private lateinit var searchAcrossSplitsResetLB: JLabel
 
     private var defaultBean: UserConfig.DataBean? = null
 
@@ -113,6 +115,16 @@ class ConfigUI {
             scrolloffTF.text = i.toString()
         }
 
+    var searchAcrossSplits: Boolean
+        get() = try {
+            searchAcrossSplitsCB.isSelected
+        } catch (e: Exception) {
+            true
+        }
+        set(b) {
+            searchAcrossSplitsCB.isSelected = b
+        }
+
     fun initReset(defaultBean: UserConfig.DataBean) {
         this.defaultBean = defaultBean
         installListeners()
@@ -123,6 +135,7 @@ class ConfigUI {
         charactersTF.document.addDocumentListener(simpleDocListener { updateResetStates() })
         labelBeforeMatchCB.addChangeListener { updateResetStates() }
         autoJumpWhenSingleCB.addChangeListener { updateResetStates() }
+        searchAcrossSplitsCB.addChangeListener { updateResetStates() }
 
         val colorPanels = listOf(
             labelFgTF, labelBgTF, labelHitFgTF, labelHitBgTF,
@@ -169,6 +182,11 @@ class ConfigUI {
                 autoJumpWhenSingle = it.autoJumpWhenSingle
             }
         }
+        addResetAction(searchAcrossSplitsResetLB) {
+            defaultBean?.let {
+                searchAcrossSplits = it.searchAcrossSplits
+            }
+        }
     }
 
     private fun addResetAction(label: JLabel, action: () -> Unit) {
@@ -211,6 +229,10 @@ class ConfigUI {
         updateResetLabel(
             autoJumpResetLB,
             autoJumpWhenSingle != d.autoJumpWhenSingle
+        )
+        updateResetLabel(
+            searchAcrossSplitsResetLB,
+            searchAcrossSplits != d.searchAcrossSplits
         )
     }
 

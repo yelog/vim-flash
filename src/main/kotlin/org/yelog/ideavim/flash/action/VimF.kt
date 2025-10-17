@@ -141,7 +141,7 @@ class VimF : Finder {
                 e.scrollingModel.scrollVertically(scrollY.coerceAtLeast(0))
             }
             // Return single mark to indicate completion but keep search active
-            return listOf(MarksCanvas.Mark("", nextOffset, 1))
+            return listOf(MarksCanvas.Mark("", nextOffset, 1, sourceEditor = e))
         }
 
         if (lastMarks.any { it.keyTag.contains(c) }) {
@@ -188,7 +188,7 @@ class VimF : Finder {
         }
 
         // Return single mark to indicate completion but keep finder active for 'f' repeats
-        return listOf(MarksCanvas.Mark("", closestOffset, 1))
+        return listOf(MarksCanvas.Mark("", closestOffset, 1, sourceEditor = e))
     }
 
     private fun findMatchesInDocument(c: Char): List<Int> {

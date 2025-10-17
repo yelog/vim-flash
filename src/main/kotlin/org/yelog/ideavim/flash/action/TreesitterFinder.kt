@@ -62,7 +62,8 @@ class TreesitterFinder : Finder {
                 charLength = 0,
                 advanceIndex = 0,
                 hintMark = false,
-                rangeEnd = end
+                rangeEnd = end,
+                sourceEditor = e
             )
         }
 
@@ -96,7 +97,8 @@ class TreesitterFinder : Finder {
                     charLength = 0,
                     advanceIndex = 0,
                     hintMark = true,
-                    rangeEnd = found.rangeEnd
+                    rangeEnd = found.rangeEnd,
+                    sourceEditor = e
                 )
             )
         } else {

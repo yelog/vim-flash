@@ -9,7 +9,7 @@ class Configurable : Configurable {
     private lateinit var ui: ConfigUI
 
     override fun isModified(): Boolean {
-        return ui.characters != config.characters || ui.labelFg != config.labelFg || ui.labelBg != config.labelBg || ui.labelHitFg != config.labelHitFg || ui.labelHitBg != config.labelHitBg || ui.matchFg != config.matchFg || ui.matchBg != config.matchBg || ui.matchNearestFg != config.matchNearestFg || ui.matchNearestBg != config.matchNearestBg || ui.labelBeforeMatch != config.labelBeforeMatch || ui.autoJumpWhenSingle != config.autoJumpWhenSingle || ui.scrolloff != config.scrolloff
+        return ui.characters != config.characters || ui.labelFg != config.labelFg || ui.labelBg != config.labelBg || ui.labelHitFg != config.labelHitFg || ui.labelHitBg != config.labelHitBg || ui.matchFg != config.matchFg || ui.matchBg != config.matchBg || ui.matchNearestFg != config.matchNearestFg || ui.matchNearestBg != config.matchNearestBg || ui.labelBeforeMatch != config.labelBeforeMatch || ui.autoJumpWhenSingle != config.autoJumpWhenSingle || ui.scrolloff != config.scrolloff || ui.searchAcrossSplits != config.searchAcrossSplits
     }
 
     override fun getDisplayName(): String {
@@ -29,6 +29,7 @@ class Configurable : Configurable {
         config.labelBeforeMatch = ui.labelBeforeMatch
         config.autoJumpWhenSingle = ui.autoJumpWhenSingle
         config.scrolloff = ui.scrolloff
+        config.searchAcrossSplits = ui.searchAcrossSplits
     }
 
     override fun reset() {
@@ -55,5 +56,6 @@ class Configurable : Configurable {
         ui.labelBeforeMatch = config.labelBeforeMatch
         ui.autoJumpWhenSingle = config.autoJumpWhenSingle
         ui.scrolloff = config.scrolloff
+        ui.searchAcrossSplits = config.searchAcrossSplits
     }
 }
