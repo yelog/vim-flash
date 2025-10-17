@@ -2,8 +2,15 @@ package org.yelog.ideavim.flash
 
 import javax.swing.JPanel
 import javax.swing.JTextField
+import javax.swing.JLabel
 import com.intellij.ui.ColorPanel
+import com.intellij.ui.JBColor
 import java.awt.Color
+import java.awt.Cursor
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 
 class ConfigUI {
     lateinit var rootPanel: JPanel
@@ -19,6 +26,17 @@ class ConfigUI {
     private lateinit var labelBeforeMatchCB: javax.swing.JCheckBox // Added for form binding
     private lateinit var autoJumpWhenSingleCB: javax.swing.JCheckBox // Added for form binding
     private lateinit var scrolloffTF:  JTextField // Added for form binding
+
+    // Reset labels
+    private lateinit var charactersResetLB: JLabel
+    private lateinit var labelColorResetLB: JLabel
+    private lateinit var labelHitColorResetLB: JLabel
+    private lateinit var matchColorResetLB: JLabel
+    private lateinit var matchNearestColorResetLB: JLabel
+    private lateinit var labelPositionResetLB: JLabel
+    private lateinit var autoJumpResetLB: JLabel
+
+    private var defaultBean: UserConfig.DataBean? = null
 
     var characters: String?
         get() = charactersTF.text
@@ -94,4 +112,118 @@ class ConfigUI {
         set(i) {
             scrolloffTF.text = i.toString()
         }
+
+    fun initReset(defaultBean: UserConfig.DataBean) {
+        this.defaultBean = defaultBean
+        installListeners()
+        updateResetStates()
+    }
+
+    private fun installListeners() {
+        charactersTF.document.addDocumentListener(simpleDocListener { updateResetStates() })
+        labelBeforeMatchCB.addChangeListener { updateResetStates() }
+        autoJumpWhenSingleCB.addChangeListener { updateResetStates() }
+
+        val colorPanels = listOf(
+            labelFgTF, labelBgTF, labelHitFgTF, labelHitBgTF,
+            matchFgTF, matchBgTF, matchNearestFgTF, matchNearestBgTF
+        )
+        colorPanels.forEach { panel ->
+            panel.addActionListener { updateResetStates() }
+        }
+
+        addResetAction(charactersResetLB) {
+            defaultBean?.let { characters = it.characters }
+        }
+        addResetAction(labelColorResetLB) {
+            defaultBean?.let {
+                labelFg = it.labelFg
+                labelBg = it.labelBg
+            }
+        }
+        addResetAction(labelHitColorResetLB) {
+            defaultBean?.let {
+                labelHitFg = it.labelHitFg
+                labelHitBg = it.labelHitBg
+            }
+        }
+        addResetAction(matchColorResetLB) {
+            defaultBean?.let {
+                matchFg = it.matchFg
+                matchBg = it.matchBg
+            }
+        }
+        addResetAction(matchNearestColorResetLB) {
+            defaultBean?.let {
+                matchNearestFg = it.matchNearestFg
+                matchNearestBg = it.matchNearestBg
+            }
+        }
+        addResetAction(labelPositionResetLB) {
+            defaultBean?.let {
+                labelBeforeMatch = it.labelBeforeMatch
+            }
+        }
+        addResetAction(autoJumpResetLB) {
+            defaultBean?.let {
+                autoJumpWhenSingle = it.autoJumpWhenSingle
+            }
+        }
+    }
+
+    private fun addResetAction(label: JLabel, action: () -> Unit) {
+        label.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent?) {
+                if (label.isEnabled) {
+                    action()
+                    updateResetStates()
+                }
+            }
+        })
+    }
+
+    private fun updateResetStates() {
+        val d = defaultBean ?: return
+        updateResetLabel(
+            charactersResetLB,
+            characters != d.characters
+        )
+        updateResetLabel(
+            labelColorResetLB,
+            labelFg != d.labelFg || labelBg != d.labelBg
+        )
+        updateResetLabel(
+            labelHitColorResetLB,
+            labelHitFg != d.labelHitFg || labelHitBg != d.labelHitBg
+        )
+        updateResetLabel(
+            matchColorResetLB,
+            matchFg != d.matchFg || matchBg != d.matchBg
+        )
+        updateResetLabel(
+            matchNearestColorResetLB,
+            matchNearestFg != d.matchNearestFg || matchNearestBg != d.matchNearestBg
+        )
+        updateResetLabel(
+            labelPositionResetLB,
+            labelBeforeMatch != d.labelBeforeMatch
+        )
+        updateResetLabel(
+            autoJumpResetLB,
+            autoJumpWhenSingle != d.autoJumpWhenSingle
+        )
+    }
+
+    private fun updateResetLabel(label: JLabel, modified: Boolean) {
+        label.isEnabled = modified
+        label.foreground = if (modified) JBColor.BLUE else JBColor.GRAY
+        label.cursor = if (modified) Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+        else Cursor.getDefaultCursor()
+    }
+
+    private fun simpleDocListener(onChange: () -> Unit) = object : DocumentListener {
+        override fun insertUpdate(e: DocumentEvent?) = onChange()
+        override fun removeUpdate(e: DocumentEvent?) = onChange()
+        override fun changedUpdate(e: DocumentEvent?) = onChange()
+    }
 }

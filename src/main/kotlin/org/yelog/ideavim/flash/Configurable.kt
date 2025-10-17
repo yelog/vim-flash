@@ -38,6 +38,7 @@ class Configurable : Configurable {
     override fun createComponent(): JComponent {
         ui = ConfigUI()
         fillUI()
+        ui.initReset(DataBean()) // 传入默认值用于 Reset 逻辑
         return ui.rootPanel
     }
 

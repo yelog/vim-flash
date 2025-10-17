@@ -32,7 +32,7 @@
           </component>
         </children>
       </grid>
-      <grid id="bcce7" layout-manager="GridLayoutManager" row-count="8" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="bcce7" layout-manager="GridLayoutManager" row-count="8" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -202,6 +202,69 @@
             <properties>
               <selected value="false"/>
               <text value="Auto jump when only one match"/>
+            </properties>
+          </component>
+          <component id="charactersReset" class="javax.swing.JLabel" binding="charactersResetLB">
+            <constraints>
+              <grid row="0" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Reset"/>
+              <enabled value="false"/>
+            </properties>
+          </component>
+          <component id="labelColorReset" class="javax.swing.JLabel" binding="labelColorResetLB">
+            <constraints>
+              <grid row="2" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Reset"/>
+              <enabled value="false"/>
+            </properties>
+          </component>
+          <component id="labelHitColorReset" class="javax.swing.JLabel" binding="labelHitColorResetLB">
+            <constraints>
+              <grid row="3" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Reset"/>
+              <enabled value="false"/>
+            </properties>
+          </component>
+          <component id="matchColorReset" class="javax.swing.JLabel" binding="matchColorResetLB">
+            <constraints>
+              <grid row="4" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Reset"/>
+              <enabled value="false"/>
+            </properties>
+          </component>
+            <component id="matchNearestColorReset" class="javax.swing.JLabel" binding="matchNearestColorResetLB">
+              <constraints>
+                <grid row="5" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+              </constraints>
+              <properties>
+                <text value="Reset"/>
+                <enabled value="false"/>
+              </properties>
+            </component>
+          <component id="labelPositionReset" class="javax.swing.JLabel" binding="labelPositionResetLB">
+            <constraints>
+              <grid row="6" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Reset"/>
+              <enabled value="false"/>
+            </properties>
+          </component>
+          <component id="autoJumpReset" class="javax.swing.JLabel" binding="autoJumpResetLB">
+            <constraints>
+              <grid row="7" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Reset"/>
+              <enabled value="false"/>
             </properties>
           </component>
         </children>
