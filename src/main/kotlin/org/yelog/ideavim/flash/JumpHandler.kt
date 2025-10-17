@@ -318,9 +318,29 @@ object JumpHandler : TypedActionHandler {
                 // 跨分屏显示
                 if (currentMode == Mode.SEARCH && config.searchAcrossSplits && marks.any { it.sourceEditor != null }) {
                     val grouped = marks.groupBy { it.sourceEditor ?: editor }
-                    // 为每个编辑器创建或更新 canvas
+
+                    // 需要显示的编辑器集合
+                    val editorsWithMarks = grouped.keys
+
+                    // 移除已无匹配的分屏画布（否则残留上一次的标签）
+                    val toRemove = canvasMap.filterKeys { it !in editorsWithMarks }.toList()
+                    toRemove.forEach { (ed, canvas) ->
+                        val parent = canvas.parent
+                        if (parent != null) {
+                            parent.remove(canvas)
+                            parent.repaint()
+                        }
+                        canvasMap.remove(ed)
+                    }
+
+                    // 为每个有匹配的编辑器创建或更新 canvas
                     grouped.forEach { (ed, ms) ->
-                        val canvas = canvasMap.getOrPut(ed) { MarksCanvas().apply { sync(ed); ed.contentComponent.add(this) } }
+                        val canvas = canvasMap.getOrPut(ed) {
+                            MarksCanvas().apply {
+                                sync(ed)
+                                ed.contentComponent.add(this)
+                            }
+                        }
                         canvas.sync(ed)
                         canvas.setData(ms, this.searchString)
                         ed.contentComponent.repaint()
