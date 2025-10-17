@@ -18,6 +18,10 @@ class Search : Finder {
     private lateinit var visibleString: String
     private lateinit var visibleRange: TextRange
 
+    // 记录发起搜索的编辑器与光标，用于全局最近匹配判定
+    private var originEditor: Editor? = null
+    private var originCaretOffset: Int = 0
+
     // 跨分屏支持
     private data class SplitInfo(
         val editor: Editor,
@@ -28,6 +32,8 @@ class Search : Finder {
 
     override fun start(e: Editor, mode: Mode): List<MarksCanvas.Mark>? {
         val config = UserConfig.getDataBean()
+        originEditor = e
+        originCaretOffset = e.caretModel.offset
         if (config.searchAcrossSplits) {
             val project = e.project
             if (project != null) {
@@ -104,12 +110,23 @@ class Search : Finder {
             }
 
             val tags = KeyTagsGenerator.createTagsTree(allMatches.size, remainCharacter)
+
+            // 计算全局最近匹配：优先以发起搜索编辑器的光标距离；若该编辑器无匹配则用各自光标距离
+            val nearestTriple = allMatches.minByOrNull { (ed, off, _) ->
+                if (ed == originEditor) {
+                    kotlin.math.abs(off - originCaretOffset)
+                } else {
+                    kotlin.math.abs(off - ed.caretModel.offset)
+                }
+            }
+
             return allMatches.zip(tags).map { (triple, tag) ->
                 MarksCanvas.Mark(
                     keyTag = tag,
                     offset = triple.second,
                     charLength = searchString.length,
-                    sourceEditor = triple.first
+                    sourceEditor = triple.first,
+                    isNearest = (triple == nearestTriple)
                 )
             }
         }

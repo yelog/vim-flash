@@ -35,7 +35,8 @@ interface Finder {
                     advanceIndex = it.advanceIndex + 1,
                     hintMark = true,
                     rangeEnd = it.rangeEnd,
-                    sourceEditor = it.sourceEditor
+                    sourceEditor = it.sourceEditor,
+                    isNearest = it.isNearest
                 )
             }
             .toList()

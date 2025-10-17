@@ -108,7 +108,7 @@ class MarksCanvas : JComponent() {
                         }
                         val fg: Int
                         val bg: Int
-                        if (mMarks[0].offset == it.first.offset) {
+                        if (mark.isNearest) { // 仅全局最近的一个匹配使用最近配色
                             g2d.color = Color(config.matchNearestBg, true)
                             fg = config.matchNearestFg
                             bg = config.matchNearestBg
@@ -223,6 +223,7 @@ class MarksCanvas : JComponent() {
         val advanceIndex: Int = 0,
         val hintMark: Boolean = false,
         val rangeEnd: Int = -1, // 语法范围结束（不包含），-1 表示无
-        val sourceEditor: Editor? = null // 分屏来源编辑器
+        val sourceEditor: Editor? = null, // 分屏来源编辑器
+        val isNearest: Boolean = false // 是否为全局最近匹配
     )
 }

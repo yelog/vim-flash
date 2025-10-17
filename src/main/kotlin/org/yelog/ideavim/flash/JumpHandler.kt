@@ -257,8 +257,30 @@ object JumpHandler : TypedActionHandler {
     // When the Enter key is pressed
     private val enterActionHandler: EditorActionHandler = object : EditorActionHandler() {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-            moveToOffset(editor, lastMarks[0].offset)
-            stop(editor)
+            if (lastMarks.isEmpty()) {
+                stop(editor)
+                return
+            }
+            // 选择全局最近匹配（跨分屏场景），否则使用第一个
+            val chosen = lastMarks.firstOrNull { it.isNearest } ?: lastMarks[0]
+            val targetEditor = chosen.sourceEditor ?: editor
+
+            // Treesitter 模式下且是范围标签，选中范围
+            if (currentMode == Mode.TREESITTER && chosen.rangeEnd > chosen.offset) {
+                val c = targetEditor.caretModel.currentCaret
+                c.removeSelection()
+                c.setSelection(chosen.offset, chosen.rangeEnd)
+                c.moveToOffset(chosen.offset)
+                targetEditor.contentComponent.requestFocus()
+                stop(targetEditor)
+                onJump?.invoke()
+                return
+            }
+
+            // 普通跳转
+            moveToOffset(targetEditor, chosen.offset)
+            targetEditor.contentComponent.requestFocus()
+            stop(targetEditor)
             onJump?.invoke()
         }
     }
