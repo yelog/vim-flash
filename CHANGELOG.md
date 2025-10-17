@@ -2,6 +2,12 @@
 
 # vim-flash Changelog
 
+## 1.0.0
+
+Most of the intended features have already been implemented. This marks the official release, with the version number changed to 1.0.0.
+
+- feat: Changed the color setting in the settings interface from text input to a color picker
+
 ## 0.1.5
 
 - fix: register document listeners with disposables to avoid deprecated API usage on 253 builds

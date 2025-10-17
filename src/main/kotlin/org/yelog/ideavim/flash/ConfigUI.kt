@@ -2,18 +2,20 @@ package org.yelog.ideavim.flash
 
 import javax.swing.JPanel
 import javax.swing.JTextField
+import com.intellij.ui.ColorPanel
+import java.awt.Color
 
 class ConfigUI {
     lateinit var rootPanel: JPanel
     private lateinit var charactersTF: JTextField
-    private lateinit var labelFgTF: JTextField
-    private lateinit var labelBgTF: JTextField
-    private lateinit var labelHitFgTF: JTextField
-    private lateinit var labelHitBgTF: JTextField
-    private lateinit var matchFgTF: JTextField
-    private lateinit var matchBgTF: JTextField
-    private lateinit var matchNearestFgTF: JTextField
-    private lateinit var matchNearestBgTF: JTextField
+    private lateinit var labelFgTF: ColorPanel
+    private lateinit var labelBgTF: ColorPanel
+    private lateinit var labelHitFgTF: ColorPanel
+    private lateinit var labelHitBgTF: ColorPanel
+    private lateinit var matchFgTF: ColorPanel
+    private lateinit var matchBgTF: ColorPanel
+    private lateinit var matchNearestFgTF: ColorPanel
+    private lateinit var matchNearestBgTF: ColorPanel
     private lateinit var labelBeforeMatchCB: javax.swing.JCheckBox // Added for form binding
     private lateinit var autoJumpWhenSingleCB: javax.swing.JCheckBox // Added for form binding
     private lateinit var scrolloffTF:  JTextField // Added for form binding
@@ -25,76 +27,44 @@ class ConfigUI {
         }
 
     var labelFg: Int
-        get() = try {
-            Integer.parseUnsignedInt(labelFgTF.text, 16)
-        } catch (e: NumberFormatException) {
-            0
-        }
+        get() = labelFgTF.selectedColor?.rgb ?: 0
         set(c) {
-            labelFgTF.text = Integer.toHexString(c)
+            labelFgTF.setSelectedColor(Color(c, true))
         }
     var labelBg: Int
-        get() = try {
-            Integer.parseUnsignedInt(labelBgTF.text, 16)
-        } catch (e: NumberFormatException) {
-            0
-        }
+        get() = labelBgTF.selectedColor?.rgb ?: 0
         set(c) {
-            labelBgTF.text = Integer.toHexString(c)
+            labelBgTF.setSelectedColor(Color(c, true))
         }
     var labelHitFg: Int
-        get() = try {
-            Integer.parseUnsignedInt(labelHitFgTF.text, 16)
-        } catch (e: NumberFormatException) {
-            0
-        }
+        get() = labelHitFgTF.selectedColor?.rgb ?: 0
         set(c) {
-            labelHitFgTF.text = Integer.toHexString(c)
+            labelHitFgTF.setSelectedColor(Color(c, true))
         }
     var labelHitBg: Int
-        get() = try {
-            Integer.parseUnsignedInt(labelHitBgTF.text, 16)
-        } catch (e: NumberFormatException) {
-            0
-        }
+        get() = labelHitBgTF.selectedColor?.rgb ?: 0
         set(c) {
-            labelHitBgTF.text = Integer.toHexString(c)
+            labelHitBgTF.setSelectedColor(Color(c, true))
         }
     var matchFg: Int
-        get() = try {
-            Integer.parseUnsignedInt(matchFgTF.text, 16)
-        } catch (e: NumberFormatException) {
-            0
-        }
+        get() = matchFgTF.selectedColor?.rgb ?: 0
         set(c) {
-            matchFgTF.text = Integer.toHexString(c)
+            matchFgTF.setSelectedColor(Color(c, true))
         }
     var matchBg: Int
-        get() = try {
-            Integer.parseUnsignedInt(matchBgTF.text, 16)
-        } catch (e: NumberFormatException) {
-            0
-        }
+        get() = matchBgTF.selectedColor?.rgb ?: 0
         set(c) {
-            matchBgTF.text = Integer.toHexString(c)
+            matchBgTF.setSelectedColor(Color(c, true))
         }
     var matchNearestFg: Int
-        get() = try {
-            Integer.parseUnsignedInt(matchNearestFgTF.text, 16)
-        } catch (e: NumberFormatException) {
-            0
-        }
+        get() = matchNearestFgTF.selectedColor?.rgb ?: 0
         set(c) {
-            matchNearestFgTF.text = Integer.toHexString(c)
+            matchNearestFgTF.setSelectedColor(Color(c, true))
         }
     var matchNearestBg: Int
-        get() = try {
-            Integer.parseUnsignedInt(matchNearestBgTF.text, 16)
-        } catch (e: NumberFormatException) {
-            0
-        }
+        get() = matchNearestBgTF.selectedColor?.rgb ?: 0
         set(c) {
-            matchNearestBgTF.text = Integer.toHexString(c)
+            matchNearestBgTF.setSelectedColor(Color(c, true))
         }
     var labelBeforeMatch: Boolean
         get() = try {

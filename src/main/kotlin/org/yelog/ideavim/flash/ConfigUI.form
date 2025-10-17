@@ -82,25 +82,21 @@
               <text value="Label Color:"/>
             </properties>
           </component>
-          <component id="406bd" class="javax.swing.JTextField" binding="labelFgTF">
+          <component id="406bd" class="com.intellij.ui.ColorPanel" binding="labelFgTF">
             <constraints>
               <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
-            <properties>
-              <text value=""/>
-            </properties>
+            <properties/>
           </component>
-          <component id="e6df1" class="javax.swing.JTextField" binding="labelBgTF">
+          <component id="e6df1" class="com.intellij.ui.ColorPanel" binding="labelBgTF">
             <constraints>
               <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
-            <properties>
-              <text value=""/>
-            </properties>
+            <properties/>
           </component>
           <component id="cc3d2" class="javax.swing.JLabel">
             <constraints>
@@ -110,25 +106,21 @@
               <text value="Label hit Color:"/>
             </properties>
           </component>
-          <component id="44f7c" class="javax.swing.JTextField" binding="labelHitFgTF">
+          <component id="44f7c" class="com.intellij.ui.ColorPanel" binding="labelHitFgTF">
             <constraints>
               <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
-            <properties>
-              <text value=""/>
-            </properties>
+            <properties/>
           </component>
-          <component id="f3a7b" class="javax.swing.JTextField" binding="labelHitBgTF">
+          <component id="f3a7b" class="com.intellij.ui.ColorPanel" binding="labelHitBgTF">
             <constraints>
               <grid row="3" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
-            <properties>
-              <text value=""/>
-            </properties>
+            <properties/>
           </component>
           <component id="d1ae" class="javax.swing.JLabel">
             <constraints>
@@ -138,25 +130,21 @@
               <text value="Match Color:"/>
             </properties>
           </component>
-          <component id="6b602" class="javax.swing.JTextField" binding="matchFgTF">
+          <component id="6b602" class="com.intellij.ui.ColorPanel" binding="matchFgTF">
             <constraints>
               <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
-            <properties>
-              <text value=""/>
-            </properties>
+            <properties/>
           </component>
-          <component id="6ce9e" class="javax.swing.JTextField" binding="matchBgTF">
+          <component id="6ce9e" class="com.intellij.ui.ColorPanel" binding="matchBgTF">
             <constraints>
               <grid row="4" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
-            <properties>
-              <text value=""/>
-            </properties>
+            <properties/>
           </component>
           <component id="1ed99" class="javax.swing.JLabel">
             <constraints>
@@ -166,25 +154,21 @@
               <text value="Match nearest Color:"/>
             </properties>
           </component>
-          <component id="1de4" class="javax.swing.JTextField" binding="matchNearestBgTF">
+          <component id="1de4" class="com.intellij.ui.ColorPanel" binding="matchNearestBgTF">
             <constraints>
               <grid row="5" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
-            <properties>
-              <text value=""/>
-            </properties>
+            <properties/>
           </component>
-          <component id="8267e" class="javax.swing.JTextField" binding="matchNearestFgTF">
+          <component id="8267e" class="com.intellij.ui.ColorPanel" binding="matchNearestFgTF">
             <constraints>
               <grid row="5" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
-            <properties>
-              <text value=""/>
-            </properties>
+            <properties/>
           </component>
           <component id="abc123" class="javax.swing.JLabel">
             <constraints>
