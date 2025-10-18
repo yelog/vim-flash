@@ -37,6 +37,7 @@ class ConfigUI {
     private lateinit var labelPositionResetLB: JLabel
     private lateinit var autoJumpResetLB: JLabel
     private lateinit var searchAcrossSplitsResetLB: JLabel
+    private lateinit var scrolloffResetLB: JLabel
 
     private var defaultBean: UserConfig.DataBean? = null
 
@@ -133,6 +134,7 @@ class ConfigUI {
 
     private fun installListeners() {
         charactersTF.document.addDocumentListener(simpleDocListener { updateResetStates() })
+        scrolloffTF.document.addDocumentListener(simpleDocListener { updateResetStates() })
         labelBeforeMatchCB.addChangeListener { updateResetStates() }
         autoJumpWhenSingleCB.addChangeListener { updateResetStates() }
         searchAcrossSplitsCB.addChangeListener { updateResetStates() }
@@ -182,6 +184,11 @@ class ConfigUI {
                 autoJumpWhenSingle = it.autoJumpWhenSingle
             }
         }
+        addResetAction(scrolloffResetLB) {
+            defaultBean?.let {
+                scrolloff = it.scrolloff
+            }
+        }
         addResetAction(searchAcrossSplitsResetLB) {
             defaultBean?.let {
                 searchAcrossSplits = it.searchAcrossSplits
@@ -229,6 +236,10 @@ class ConfigUI {
         updateResetLabel(
             autoJumpResetLB,
             autoJumpWhenSingle != d.autoJumpWhenSingle
+        )
+        updateResetLabel(
+            scrolloffResetLB,
+            scrolloff != d.scrolloff
         )
         updateResetLabel(
             searchAcrossSplitsResetLB,
