@@ -2,6 +2,10 @@
 
 # vim-flash Changelog
 
+## 1.0.2
+
+- feat: Removed the upper limit requirement for IntelliJ Platform versions, now supports 231 and higher
+
 ## 1.0.1
 
 - feat: `flash.search` is now available when using split screens; enabled by default and can be controlled in settings via `Search across splits`

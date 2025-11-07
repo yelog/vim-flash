@@ -83,9 +83,13 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
     ]]></description>
 
     <change-notes><![CDATA[
+        <h2>1.0.2</h2>
+        <ul>
+          <li>feat: Removed the upper limit requirement for IntelliJ Platform versions, now supports 231 and higher</li>
+        </ul>
         <h2>1.0.1</h2>
         <ul>
-        <li>feat: <code>flash.search</code> is now available when using split screens; enabled by default and can be controlled in settings via <code>Search across splits</code></li>
+          <li>feat: <code>flash.search</code> is now available when using split screens; enabled by default and can be controlled in settings via <code>Search across splits</code></li>
         </ul>
         <h2>1.0.0</h2>
         <ul>
