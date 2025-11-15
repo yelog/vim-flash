@@ -27,6 +27,7 @@ class ConfigUI {
     private lateinit var autoJumpWhenSingleCB: javax.swing.JCheckBox // Added for form binding
     private lateinit var scrolloffTF:  JTextField // Added for form binding
     private lateinit var searchAcrossSplitsCB: javax.swing.JCheckBox
+    private lateinit var vimModeTimeoutTF: JTextField
 
     // Reset labels
     private lateinit var charactersResetLB: JLabel
@@ -38,6 +39,7 @@ class ConfigUI {
     private lateinit var autoJumpResetLB: JLabel
     private lateinit var searchAcrossSplitsResetLB: JLabel
     private lateinit var scrolloffResetLB: JLabel
+    private lateinit var vimModeTimeoutResetLB: JLabel
 
     private var defaultBean: UserConfig.DataBean? = null
 
@@ -125,6 +127,11 @@ class ConfigUI {
         set(b) {
             searchAcrossSplitsCB.isSelected = b
         }
+    var vimModeTimeout: Int
+        get() = vimModeTimeoutTF.text.toIntOrNull() ?: UserConfig.DEFAULT_VIM_MODE_TIMEOUT
+        set(value) {
+            vimModeTimeoutTF.text = value.toString()
+        }
 
     fun initReset(defaultBean: UserConfig.DataBean) {
         this.defaultBean = defaultBean
@@ -135,6 +142,7 @@ class ConfigUI {
     private fun installListeners() {
         charactersTF.document.addDocumentListener(simpleDocListener { updateResetStates() })
         scrolloffTF.document.addDocumentListener(simpleDocListener { updateResetStates() })
+        vimModeTimeoutTF.document.addDocumentListener(simpleDocListener { updateResetStates() })
         labelBeforeMatchCB.addChangeListener { updateResetStates() }
         autoJumpWhenSingleCB.addChangeListener { updateResetStates() }
         searchAcrossSplitsCB.addChangeListener { updateResetStates() }
@@ -194,6 +202,11 @@ class ConfigUI {
                 searchAcrossSplits = it.searchAcrossSplits
             }
         }
+        addResetAction(vimModeTimeoutResetLB) {
+            defaultBean?.let {
+                vimModeTimeout = it.vimModeTimeoutMillis
+            }
+        }
     }
 
     private fun addResetAction(label: JLabel, action: () -> Unit) {
@@ -244,6 +257,10 @@ class ConfigUI {
         updateResetLabel(
             searchAcrossSplitsResetLB,
             searchAcrossSplits != d.searchAcrossSplits
+        )
+        updateResetLabel(
+            vimModeTimeoutResetLB,
+            vimModeTimeout != d.vimModeTimeoutMillis
         )
     }
 

@@ -2,6 +2,10 @@
 
 # vim-flash Changelog
 
+## 1.0.3
+
+- feat: Support setting a timeout for cancellation in `flash.[find,find_backward,till,till_backward,repeat,repeat_backward]` operations
+
 ## 1.0.2
 
 - feat: Removed the upper limit requirement for IntelliJ Platform versions, now supports 231 and higher

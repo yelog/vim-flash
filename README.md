@@ -115,6 +115,7 @@ Find `Settings -> Others Settings -> vim-flash` to configure the plugin.
     * Auto Jump: If this is set to true, them the plugin will automatically jump when there is only one match.
 - flash.[find,find_backward,till,till_backward,repeat,repeat_backward]
     * Scroll Off: This is the number of lines to keep above and below the cursor when jumping to a match. Default is 4.
+    * Timeout cancel (ms): Controls how long (in milliseconds) Vim-style `flash.*` actions stay active while waiting for the next key. `-1` disables the timeout (default). Setting it to a positive value like `1500` automatically exits the mode (equivalent to pressing `Esc`) if no key is pressed within that time after a jump.
 
 
 ## Installation

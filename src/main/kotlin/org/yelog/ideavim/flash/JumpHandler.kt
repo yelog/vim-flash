@@ -5,6 +5,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.actionSystem.IdeActions
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.command.CommandEvent
 import com.intellij.openapi.command.CommandListener
 import com.intellij.openapi.command.CommandProcessor
@@ -29,6 +31,9 @@ import org.yelog.ideavim.flash.utils.notify
 import java.awt.Color
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
+import com.intellij.util.concurrency.AppExecutorUtil
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 
@@ -48,6 +53,8 @@ object JumpHandler : TypedActionHandler {
     private var remoteOriginEditor: Editor? = null
     private var remoteAwaitingReturn: Boolean = false
     private var isCanvasAdded = false
+    private var activeEditor: Editor? = null
+    private var vimModeTimeoutFuture: ScheduledFuture<*>? = null
 
     // 记录最近一次 DataContext，用于 stopAndDispatch 透传按键
     // --- remote offset 修正 ---
@@ -220,23 +227,27 @@ object JumpHandler : TypedActionHandler {
         // 保存 DataContext，便于后续透传
         lastDataContext = dc
 
-        // Treesitter 模式不累加 searchString，以便非 label 按键直接透传
-        if (currentMode != Mode.TREESITTER) {
-            this.searchString += c
-        }
+        try {
+            // Treesitter 模式不累加 searchString，以便非 label 按键直接透传
+            if (currentMode != Mode.TREESITTER) {
+                this.searchString += c
+            }
 
-        val previousMarks = lastMarks
-        val marks = finder.input(e, c, lastMarks, searchString)
+            val previousMarks = lastMarks
+            val marks = finder.input(e, c, lastMarks, searchString)
 
-        // Treesitter 模式：输入的按键不是任何 label，则直接退出并透传该按键
-        if (currentMode == Mode.TREESITTER && marks != null && marks === previousMarks) {
-            stopAndDispatch(e, c)
-            return
-        }
+            // Treesitter 模式：输入的按键不是任何 label，则直接退出并透传该按键
+            if (currentMode == Mode.TREESITTER && marks != null && marks === previousMarks) {
+                stopAndDispatch(e, c)
+                return
+            }
 
-        if (marks != null) {
-            lastMarks = marks
-            jumpOrShowCanvas(e, lastMarks)
+            if (marks != null) {
+                lastMarks = marks
+                jumpOrShowCanvas(e, lastMarks)
+            }
+        } finally {
+            restartVimModeTimeout(e)
         }
     }
 
@@ -390,6 +401,7 @@ object JumpHandler : TypedActionHandler {
         isStart = true
         remoteOriginOffset = -1
         val editor = anActionEvent.getData(CommonDataKeys.EDITOR) ?: return
+        activeEditor = editor
         if (mode == Mode.REMOTE) {
             remoteOriginOffset = editor.caretModel.offset
             remoteOriginEditor = editor
@@ -428,6 +440,7 @@ object JumpHandler : TypedActionHandler {
         } else {
             lastMarks = emptyList()
         }
+        restartVimModeTimeout(editor)
     }
 
     private fun stop(editor: Editor) {
@@ -463,6 +476,8 @@ object JumpHandler : TypedActionHandler {
         }
         // 可选：清空 DataContext 引用
         lastDataContext = null
+        cancelVimModeTimeout()
+        activeEditor = null
     }
 
     fun setGrayColor(editor: Editor, setGray: Boolean, mode: Mode = Mode.SEARCH) {
@@ -602,5 +617,34 @@ object JumpHandler : TypedActionHandler {
         }
         // Move the caret to the mark
         caret.moveToOffset(offset)
+    }
+
+    private fun shouldUseVimModeTimeout(): Boolean {
+        return currentMode.isVimMode() && config.vimModeTimeoutMillis >= 0
+    }
+
+    private fun restartVimModeTimeout(editor: Editor?) {
+        cancelVimModeTimeout()
+        if (!isStart || editor == null || !shouldUseVimModeTimeout()) {
+            return
+        }
+        activeEditor = editor
+        val timeout = config.vimModeTimeoutMillis
+        if (timeout < 0) {
+            return
+        }
+        val futureEditor = editor
+        vimModeTimeoutFuture = AppExecutorUtil.getAppScheduledExecutorService().schedule({
+            ApplicationManager.getApplication().invokeLater({
+                if (isStart && shouldUseVimModeTimeout() && activeEditor === futureEditor) {
+                    stop(futureEditor)
+                }
+            }, ModalityState.NON_MODAL)
+        }, timeout.toLong(), TimeUnit.MILLISECONDS)
+    }
+
+    private fun cancelVimModeTimeout() {
+        vimModeTimeoutFuture?.cancel(false)
+        vimModeTimeoutFuture = null
     }
 }
