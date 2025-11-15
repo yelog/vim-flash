@@ -86,6 +86,7 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
         <h2>1.0.3</h2>
         <ul>
           <li>feat: Support setting a timeout for cancellation in <code>flash.[find,find_backward,till,till_backward,repeat,repeat_backward]</code> operations</li>
+          <li>fix: Fixed highlight background range in <code>flash.[find,find_backward,till,till_backward,repeat,repeat_backward]</code> operations</li>
         </ul>
         <h2>1.0.2</h2>
         <ul>

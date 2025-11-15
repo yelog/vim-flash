@@ -91,6 +91,10 @@ class MarksCanvas : JComponent() {
                 }
 
                 val keyTag = it.first.keyTag
+                if (keyTag.isEmpty()) {
+                    // Vim F/T actions don't need canvas painting; they have dedicated editor highlighters
+                    return@forEach
+                }
                 val charBounds = mFontMetrics.getStringBounds("x", g).bounds
                 val bounds = mFontMetrics.getStringBounds(keyTag, g).bounds
                 // draw match text background

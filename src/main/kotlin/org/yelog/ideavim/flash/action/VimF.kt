@@ -1,6 +1,8 @@
 package org.yelog.ideavim.flash.action
 
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.colors.EditorFontType
+import com.intellij.openapi.editor.markup.CustomHighlighterRenderer
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.RangeHighlighter
@@ -12,7 +14,10 @@ import org.yelog.ideavim.flash.MarksCanvas
 import org.yelog.ideavim.flash.Mode
 import org.yelog.ideavim.flash.UserConfig
 import org.yelog.ideavim.flash.utils.getVisibleRangeOffset
+import org.yelog.ideavim.flash.utils.offsetToXYCompat
 import java.awt.Color
+import java.awt.Graphics
+import java.awt.Graphics2D
 
 class VimF : Finder {
     // Record the string of the entire document
@@ -223,14 +228,15 @@ class VimF : Finder {
 
         // Use configured colors
         val highlightAttributes = TextAttributes().apply {
-            backgroundColor = Color(config.labelBg, true)
             foregroundColor = Color(config.labelFg, true)
         }
 
         val placeholderAttributes = TextAttributes().apply {
-            backgroundColor = Color(config.matchBg, true)
             foregroundColor = Color(config.matchFg, true)
         }
+
+        val highlightRenderer = VimCharHighlightRenderer(Color(config.labelBg, true))
+        val placeholderRenderer = VimCharHighlightRenderer(Color(config.matchBg, true))
 
         val markupModel = editor.markupModel
 
@@ -246,6 +252,7 @@ class VimF : Finder {
                     placeholderAttributes,
                     HighlighterTargetArea.EXACT_RANGE
                 )
+                highlighter.customRenderer = placeholderRenderer
                 charHighlighters.add(highlighter)
             }
             val highlighter = markupModel.addRangeHighlighter(
@@ -255,6 +262,7 @@ class VimF : Finder {
                 highlightAttributes,
                 HighlighterTargetArea.EXACT_RANGE
             )
+            highlighter.customRenderer = highlightRenderer
             charHighlighters.add(highlighter)
         }
     }
@@ -267,5 +275,31 @@ class VimF : Finder {
         val markupModel = editor.markupModel
         charHighlighters.forEach { markupModel.removeHighlighter(it) }
         charHighlighters.clear()
+    }
+
+    private class VimCharHighlightRenderer(
+        private val backgroundColor: Color
+    ) : CustomHighlighterRenderer {
+        override fun paint(editor: Editor, highlighter: RangeHighlighter, g: Graphics) {
+            val startOffset = highlighter.startOffset
+            val endOffset = highlighter.endOffset
+            if (startOffset >= endOffset) return
+            val startPoint = editor.offsetToXYCompat(startOffset)
+            val endPoint = editor.offsetToXYCompat(endOffset)
+            val font = editor.colorsScheme.getFont(EditorFontType.PLAIN)
+            val metrics = editor.contentComponent.getFontMetrics(font)
+            val charHeight = metrics.ascent + metrics.descent
+            val lineHeight = editor.lineHeight
+            val yBase = startPoint.y + (lineHeight - charHeight) / 2
+            val width = if (startPoint.y == endPoint.y) {
+                (endPoint.x - startPoint.x).coerceAtLeast(1)
+            } else {
+                metrics.charWidth(' ').coerceAtLeast(1)
+            }
+            val g2d = g.create() as Graphics2D
+            g2d.color = backgroundColor
+            g2d.fillRect(startPoint.x, yBase, width, charHeight)
+            g2d.dispose()
+        }
     }
 }

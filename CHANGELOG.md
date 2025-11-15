@@ -5,6 +5,7 @@
 ## 1.0.3
 
 - feat: Support setting a timeout for cancellation in `flash.[find,find_backward,till,till_backward,repeat,repeat_backward]` operations
+- fix: Fixed highlight background range in `flash.[find,find_backward,till,till_backward,repeat,repeat_backward]` operations
 
 ## 1.0.2
 
