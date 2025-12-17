@@ -83,6 +83,10 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
     ]]></description>
 
     <change-notes><![CDATA[
+        <h2>1.0.4</h2>
+        <ul>
+          <li>fix: Compatibility verification for <code>Deprecated field ModalityState.NON_MODAL</code></li>
+        </ul>
         <h2>1.0.3</h2>
         <ul>
           <li>feat: Support setting a timeout for cancellation in <code>flash.[find,find_backward,till,till_backward,repeat,repeat_backward]</code> operations</li>

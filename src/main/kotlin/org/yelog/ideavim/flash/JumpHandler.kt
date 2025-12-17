@@ -639,8 +639,31 @@ object JumpHandler : TypedActionHandler {
                 if (isStart && shouldUseVimModeTimeout() && activeEditor === futureEditor) {
                     stop(futureEditor)
                 }
-            }, ModalityState.NON_MODAL)
+            }, nonModalModalityState())
         }, timeout.toLong(), TimeUnit.MILLISECONDS)
+    }
+
+    private fun nonModalModalityState(): ModalityState {
+        val clazz = ModalityState::class.java
+
+        fun staticMethod(name: String): ModalityState? {
+            return runCatching {
+                clazz.getMethod(name).invoke(null) as? ModalityState
+            }.getOrNull()
+        }
+
+        fun staticField(name: String): ModalityState? {
+            return runCatching {
+                clazz.getField(name).get(null) as? ModalityState
+            }.getOrNull()
+        }
+
+        return staticMethod("nonModal")
+            ?: staticField("NON_MODAL")
+            ?: staticMethod("defaultModalityState")
+            ?: staticMethod("current")
+            ?: staticMethod("any")
+            ?: error("Cannot resolve non-modal ModalityState")
     }
 
     private fun cancelVimModeTimeout() {

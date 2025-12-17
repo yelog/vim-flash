@@ -2,6 +2,10 @@
 
 # vim-flash Changelog
 
+## 1.0.4
+
+- fix: Compatibility verification for `Deprecated field ModalityState.NON_MODAL`
+
 ## 1.0.3
 
 - feat: Support setting a timeout for cancellation in `flash.[find,find_backward,till,till_backward,repeat,repeat_backward]` operations
