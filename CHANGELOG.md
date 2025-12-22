@@ -2,6 +2,10 @@
 
 # vim-flash Changelog
 
+## 1.0.5
+
+- fix: Fix an issue where flash.search searched across all open files when Search across splits was enabled.
+
 ## 1.0.4
 
 - fix: Compatibility verification for `Deprecated field ModalityState.NON_MODAL`

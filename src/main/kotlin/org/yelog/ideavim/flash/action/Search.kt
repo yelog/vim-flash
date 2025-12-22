@@ -37,13 +37,18 @@ class Search : Finder {
         if (config.searchAcrossSplits) {
             val project = e.project
             if (project != null) {
-                splits = FileEditorManager.getInstance(project).allEditors
+                val selectedEditors = FileEditorManager.getInstance(project).selectedEditors
+                splits = selectedEditors
                     .filterIsInstance<TextEditor>()
                     .map { textEd ->
                         val ed = textEd.editor
                         val vr = ed.getVisibleRangeOffset()
                         SplitInfo(ed, vr, ed.document.getText(vr))
                     }
+                if (splits.none { it.editor == e }) {
+                    val vr = e.getVisibleRangeOffset()
+                    splits = splits + SplitInfo(e, vr, e.document.getText(vr))
+                }
             } else {
                 splits = listOf(SplitInfo(e, e.getVisibleRangeOffset(), e.document.getText(e.getVisibleRangeOffset())))
             }

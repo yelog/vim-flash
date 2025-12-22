@@ -83,6 +83,10 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
     ]]></description>
 
     <change-notes><![CDATA[
+        <h2>1.0.5</h2>
+        <ul>
+          <li>fix: Fix an issue where flash.search searched across all open files when Search across splits was enabled.</li>
+        </ul>
         <h2>1.0.4</h2>
         <ul>
           <li>fix: Compatibility verification for <code>Deprecated field ModalityState.NON_MODAL</code></li>
