@@ -5,6 +5,7 @@
 ## 1.0.5
 
 - fix: Fix an issue where flash.search searched across all open files when Search across splits was enabled.
+- feat: When calling flash.search in split view, recent matches are prioritized in the split containing the cursor.
 
 ## 1.0.4
 

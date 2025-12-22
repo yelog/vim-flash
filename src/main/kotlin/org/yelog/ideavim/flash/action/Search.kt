@@ -116,11 +116,14 @@ class Search : Finder {
 
             val tags = KeyTagsGenerator.createTagsTree(allMatches.size, remainCharacter)
 
-            // 计算全局最近匹配：优先以发起搜索编辑器的光标距离；若该编辑器无匹配则用各自光标距离
-            val nearestTriple = allMatches.minByOrNull { (ed, off, _) ->
-                if (ed == originEditor) {
+            // 计算最近匹配：始终优先当前分屏（发起搜索的编辑器）
+            val originMatches = allMatches.filter { it.first == originEditor }
+            val nearestTriple = if (originMatches.isNotEmpty()) {
+                originMatches.minByOrNull { (_, off, _) ->
                     kotlin.math.abs(off - originCaretOffset)
-                } else {
+                }
+            } else {
+                allMatches.minByOrNull { (ed, off, _) ->
                     kotlin.math.abs(off - ed.caretModel.offset)
                 }
             }
