@@ -134,20 +134,20 @@ class MarksCanvas : JComponent() {
                 }
 
                 // already hit
-                var markOffset = mEditor.offsetToXYCompat(it.first.offset + it.first.charLength)
-                var xInCanvas = 0;
-                var yInCanvas = 0;
+                var markOffset: java.awt.Point
+                var xInCanvas: Int
+                var yInCanvas: Int
                 if (config.labelBeforeMatch) {
                     if (it.first.advanceIndex > 0) {
                         // Calculate the position of the marker - in front of search text
-                        val markOffset = mEditor.offsetToXYCompat(it.first.offset)
+                        markOffset = mEditor.offsetToXYCompat(it.first.offset)
                         // 计算已选择的标签在搜索词前的位置
                         val chosenTags = keyTag.substring(0, it.first.advanceIndex)
                         val tagWidth = mFontMetrics.getStringBounds(chosenTags, g).bounds.width
                         val remainTagWidth = mFontMetrics.getStringBounds(keyTag.substring(it.first.advanceIndex), g).bounds.width
-                        val xInCanvas = markOffset.x - x - tagWidth - remainTagWidth
+                        xInCanvas = markOffset.x - x - tagWidth - remainTagWidth
                         val yBase = markOffset.y - y + (globalLineHeight - bounds.height) / 2
-                        val yInCanvas = yBase + bounds.height - mFontMetrics.descent + 2
+                        yInCanvas = yBase + bounds.height - mFontMetrics.descent + 2
 
                         g2d.color = Color(config.labelHitBg, true)
                         // draw index background
@@ -173,10 +173,10 @@ class MarksCanvas : JComponent() {
                 } else {
                     if (it.first.advanceIndex > 0) {
                         // Calculate the position of the marker
-                        val markOffset = mEditor.offsetToXYCompat(it.first.offset + it.first.charLength)
-                        val xInCanvas = markOffset.x - x
+                        markOffset = mEditor.offsetToXYCompat(it.first.offset + it.first.charLength)
+                        xInCanvas = markOffset.x - x
                         val yBase = markOffset.y - y + (globalLineHeight - bounds.height) / 2
-                        val yInCanvas = yBase + bounds.height - mFontMetrics.descent + 2
+                        yInCanvas = yBase + bounds.height - mFontMetrics.descent + 2
                         val chosenTags = keyTag.substring(0, it.first.advanceIndex)
                         g2d.color = Color(config.labelHitBg, true)
                         // draw index background
