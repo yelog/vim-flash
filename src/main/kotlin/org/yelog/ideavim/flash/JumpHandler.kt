@@ -87,7 +87,8 @@ object JumpHandler : TypedActionHandler {
             if (remoteCommandListenerDisposable != null) {
                 try {
                     Disposer.dispose(remoteCommandListenerDisposable!!)
-                } catch (_: Throwable) {
+                } catch (t: Throwable) {
+                    notify("dispose command listener error: ${t.message}")
                 } finally {
                     remoteCommandListenerDisposable = null
                 }
@@ -113,7 +114,8 @@ object JumpHandler : TypedActionHandler {
         return try {
             remoteDocListenerDisposable = registerRemoteDocumentListener(document)
             true
-        } catch (_: Throwable) {
+        } catch (t: Throwable) {
+            notify("attachRemoteDocumentListener error: ${t.message}")
             remoteDocListenerDisposable = null
             false
         }
@@ -133,7 +135,8 @@ object JumpHandler : TypedActionHandler {
             } catch (t: Throwable) {
                 try {
                     Disposer.dispose(disposable)
-                } catch (_: Throwable) {
+                } catch (t: Throwable) {
+                    notify("dispose document listener error: ${t.message}")
                 }
                 throw t
             }

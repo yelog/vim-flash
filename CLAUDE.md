@@ -24,6 +24,9 @@ vim-flash is an IntelliJ Platform plugin that brings flash.nvim-style navigation
 # Run tests
 ./gradlew test
 
+# Run a single test class
+./gradlew test --tests "org.yelog.ideavim.flash.MyPluginTest"
+
 # Verify plugin (validates plugin.xml and structure)
 ./gradlew verifyPlugin
 
@@ -66,6 +69,7 @@ vim-flash is an IntelliJ Platform plugin that brings flash.nvim-style navigation
 - **Minimum Build**: 231 (2023.1)
 - **Java Version**: 17 (JetBrains JVM)
 - **Dependencies**: IdeaVIM 2.1.0 (specified in build.gradle.kts)
+- **Plugin ID**: `org.yelog.ideavim.flash`
 
 ## Architecture
 
@@ -75,10 +79,10 @@ vim-flash is an IntelliJ Platform plugin that brings flash.nvim-style navigation
 - Central orchestrator for all flash modes
 - Implements TypedActionHandler to intercept keyboard input when modes are active
 - Manages editor state: gray overlays, canvas painting, keyboard handlers
-- Handles multi-split editor support for search mode
+- Handles multi-split editor support for search mode (when `searchAcrossSplits` is enabled)
 - Coordinates timeout-based auto-cancellation for vim modes
 
-**Mode System (enum)**
+**Mode System (enum in Mode.kt)**
 - Defines all flash operation modes: SEARCH, VIM_F, VIM_F_BACKWARD, VIM_T, VIM_T_BACKWARD, VIM_REPEAT, VIM_REPEAT_BACKWARD, TREESITTER, REMOTE
 - Each mode has distinct behaviors for finding, highlighting, and jumping
 - Modes support "ALL" variants (VIM_F_ALL, etc.) that expand search range beyond initial cursor direction
@@ -93,7 +97,7 @@ vim-flash is an IntelliJ Platform plugin that brings flash.nvim-style navigation
 **MarksCanvas (JComponent)**
 - Custom Swing component overlaid on the editor for drawing labels
 - Renders label tags, match highlights, and syntax range indicators
-- Supports split-screen with separate canvas per editor
+- Supports split-screen with separate canvas per editor (SEARCH mode only)
 - Handles both character-based matches and PSI range selections
 
 **KeyTagsGenerator**
@@ -124,9 +128,10 @@ vim-flash is an IntelliJ Platform plugin that brings flash.nvim-style navigation
 
 **Search**
 - Searches for multi-character strings in visible area
-- Supports cross-split search (searches all visible editors in project)
+- Supports cross-split search when `searchAcrossSplits` is enabled (searches all visible editors in project)
 - Generates labels using KeyTagsGenerator
 - Incremental: each character typed narrows matches or advances label selection
+- When `searchAcrossSplits` is enabled, prioritizes matches in the editor containing the cursor
 
 **VimF**
 - Single-character search in a specific direction (forward/backward)
@@ -134,7 +139,7 @@ vim-flash is an IntelliJ Platform plugin that brings flash.nvim-style navigation
 - Supports 'till' variants (t/T) that stop before/after the character
 - Remembers last search for repeat commands (;/,)
 - Custom highlighters rendered directly in editor markup (not canvas)
-- Timeout-based auto-cancellation (configurable)
+- Timeout-based auto-cancellation (configurable via `vimModeTimeoutMillis`)
 
 **TreesitterFinder**
 - Uses IntelliJ PSI (Program Structure Interface) instead of tree-sitter parser
@@ -168,7 +173,7 @@ Remote mode allows operators (like delete) to be applied at a distant location w
   - `autoJumpWhenSingle`: Auto-jump when only one match
   - `scrolloff`: Lines to keep above/below cursor on jump (vim f/t modes)
   - `vimModeTimeoutMillis`: Auto-cancel timeout for vim modes (-1 = disabled)
-  - `searchAcrossSplits`: Enable cross-split search
+  - `searchAcrossSplits`: Enable cross-split search (SEARCH mode only)
 
 **Configurable** (ApplicationConfigurable)
 - UI for Settings panel (Settings → Other Settings → vim-flash)
@@ -193,9 +198,16 @@ Remote mode allows operators (like delete) to be applied at a distant location w
 
 ## Testing
 
-- Tests located in `src/test/kotlin/com/github/yelog/ideavimflash/`
+- Tests located in `src/test/kotlin/org/yelog/ideavim/flash/`
 - Run with `./gradlew test`
 - UI tests available via `./gradlew runIdeForUiTests`
+
+## CI/CD
+
+GitHub Actions workflows in `.github/workflows/`:
+- **build.yml**: Builds plugin, runs tests, verifies plugin structure
+- **release.yml**: Publishes plugin to JetBrains Marketplace
+- **run-ui-tests.yml**: Runs automated UI tests
 
 ## Plugin Registration
 
@@ -220,3 +232,4 @@ Users bind these actions in `.ideavimrc` with `map <key> <Action>(flash.*)`
 - PSI-based treesitter is not true tree-sitter but mimics the UX using IntelliJ's semantic understanding
 - Remote mode currently only supports delete-line operations (planned: yank, change)
 - Compatibility with IntelliJ Platform 231+ (2023.1 and newer)
+- Package structure: `org.yelog.ideavim.flash`

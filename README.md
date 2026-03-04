@@ -90,15 +90,21 @@ Map `r` in operator-pending (IdeaVim `omap`) to `<Action>(flash.remote)`. Exampl
 1. Press an operator like `d` to enter operator-pending mode.
 2. Press `r` to start remote flash search (same UI as search mode).
 3. Type characters to filter and press a label to pick a target line.
-4. The target line is deleted while your original cursor position is restored.
+4. The operation is executed at the target line, then your original cursor position is restored.
+
+**Supported operators:**
+- `d r` - Delete the target line
+- `y r` - Yank (copy) the target line
+- `c r` - Change the target line
+- `> r` - Indent the target line
+- `< r` - Unindent the target line
+- `= r` - Auto-format the target line
 
 Current limitations:
-- Only implements delete-line behavior (remote `d`).
 - Operates within the current editor (no multi-window yet).
 - Pattern search is limited to the visible area like normal search mode.
 
 Planned improvements:
-- Support other operators (yank/change).
 - Multi-line / range remote operations.
 
 
