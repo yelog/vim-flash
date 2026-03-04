@@ -2,6 +2,12 @@
 
 # vim-flash Changelog
 
+## 1.0.6
+
+- fix: resolve variable shadowing in MarksCanvas.kt
+- chore: add error logging for reflection calls in JumpHandler
+- chore: add GitHub hooks configuration and GEMINI.md
+
 ## 1.0.5
 
 - fix: Fix an issue where flash.search searched across all open files when Search across splits was enabled.

@@ -83,6 +83,12 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
     ]]></description>
 
     <change-notes><![CDATA[
+        <h2>1.0.6</h2>
+        <ul>
+          <li>fix: resolve variable shadowing in MarksCanvas.kt</li>
+          <li>chore: add error logging for reflection calls in JumpHandler</li>
+          <li>chore: add GitHub hooks configuration and GEMINI.md</li>
+        </ul>
         <h2>1.0.5</h2>
         <ul>
           <li>fix: Fix an issue where flash.search searched across all open files when Search across splits was enabled.</li>
