@@ -1,0 +1,94 @@
+# GitHub Actions Workflow for auto-releasing when a new tag is pushed.
+# Triggered on tag push, creates a GitHub Release with changelog from CHANGELOG.md.
+
+name: Auto Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+
+      # Check out current repository
+      - name: Fetch Sources
+        uses: actions/checkout@v5
+
+      # Check if release already exists for this tag
+      - name: Check if release exists
+        id: check_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          if gh release view "$TAG_NAME" &>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Release $TAG_NAME already exists, skipping..."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Creating new release for $TAG_NAME"
+          fi
+
+      # Set up Java environment for the next steps
+      - name: Setup Java
+        if: steps.check_release.outputs.exists == 'false'
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 17
+
+      # Setup Gradle
+      - name: Setup Gradle
+        if: steps.check_release.outputs.exists == 'false'
+        uses: gradle/actions/setup-gradle@v4
+
+      # Extract version from tag and changelog from CHANGELOG.md
+      - name: Extract Version and Changelog
+        if: steps.check_release.outputs.exists == 'false'
+        id: extract
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG_NAME#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+
+          # Extract changelog for this version from CHANGELOG.md
+          # Format: ## X.Y.Z followed by lines until next ## or end of file
+          CHANGELOG=$(sed -n "/^## ${VERSION}$/,/^## /p" CHANGELOG.md | sed '1d;$d' | sed '/^$/d')
+
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="Release $VERSION"
+          fi
+
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      # Build plugin
+      - name: Build Plugin
+        if: steps.check_release.outputs.exists == 'false'
+        run: ./gradlew buildPlugin
+
+      # Create GitHub Release
+      - name: Create GitHub Release
+        if: steps.check_release.outputs.exists == 'false'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="${{ steps.extract.outputs.tag_name }}"
+          VERSION="${{ steps.extract.outputs.version }}"
+
+          # Find the built plugin zip file
+          PLUGIN_FILE=$(ls build/distributions/*.zip | head -n1)
+
+          # Create release with changelog
+          gh release create "$TAG_NAME" \
+            --title "$TAG_NAME" \
+            --notes "${{ steps.extract.outputs.changelog }}" \
+            "$PLUGIN_FILE"
