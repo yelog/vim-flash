@@ -1,0 +1,40 @@
+{
+  "hooks" : {
+    "postToolUse" : [
+      {
+        "bash" : "\/Users\/yelog\/.copilot\/vibebar\/vibebar-hook.sh post_tool_use",
+        "timeoutSec" : 5,
+        "type" : "command"
+      }
+    ],
+    "preToolUse" : [
+      {
+        "bash" : "\/Users\/yelog\/.copilot\/vibebar\/vibebar-hook.sh pre_tool_use",
+        "timeoutSec" : 5,
+        "type" : "command"
+      }
+    ],
+    "sessionEnd" : [
+      {
+        "bash" : "\/Users\/yelog\/.copilot\/vibebar\/vibebar-hook.sh session_end",
+        "timeoutSec" : 5,
+        "type" : "command"
+      }
+    ],
+    "sessionStart" : [
+      {
+        "bash" : "\/Users\/yelog\/.copilot\/vibebar\/vibebar-hook.sh session_start",
+        "timeoutSec" : 5,
+        "type" : "command"
+      }
+    ],
+    "userPromptSubmitted" : [
+      {
+        "bash" : "\/Users\/yelog\/.copilot\/vibebar\/vibebar-hook.sh user_prompt",
+        "timeoutSec" : 5,
+        "type" : "command"
+      }
+    ]
+  },
+  "version" : 1
+}
