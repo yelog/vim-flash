@@ -46,7 +46,7 @@ jobs:
       # Setup Gradle
       - name: Setup Gradle
         if: steps.check_release.outputs.exists == 'false'
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       # Extract version from tag and changelog from CHANGELOG.md
       - name: Extract Version and Changelog
