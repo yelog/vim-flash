@@ -29,9 +29,11 @@ import org.yelog.ideavim.flash.action.TreesitterFinder
 import org.yelog.ideavim.flash.action.VimF
 import org.yelog.ideavim.flash.utils.notify
 import java.awt.Color
+import java.awt.KeyboardFocusManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.util.concurrency.AppExecutorUtil
+import java.awt.event.KeyEvent
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -55,6 +57,7 @@ object JumpHandler : TypedActionHandler {
     private var isCanvasAdded = false
     private var activeEditor: Editor? = null
     private var vimModeTimeoutFuture: ScheduledFuture<*>? = null
+    private var enterDispatcherAdded = false
 
     // 记录最近一次 DataContext，用于 stopAndDispatch 透传按键
     // --- remote offset 修正 ---
@@ -66,6 +69,20 @@ object JumpHandler : TypedActionHandler {
 
     // Record the string being currently searched
     private var searchString = ""
+
+    private val enterKeyDispatcher = java.awt.KeyEventDispatcher { event ->
+        if (!isStart || event.id != KeyEvent.KEY_PRESSED || event.keyCode != KeyEvent.VK_ENTER) {
+            return@KeyEventDispatcher false
+        }
+        val editor = activeEditor ?: return@KeyEventDispatcher false
+        val focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().focusOwner
+        if (focusOwner == null || (focusOwner != editor.contentComponent && !editor.contentComponent.isAncestorOf(focusOwner))) {
+            return@KeyEventDispatcher false
+        }
+        handleEnter(editor)
+        event.consume()
+        true
+    }
 
     // 监听下一次命令结束后把光标恢复到原位置
     private val remoteCommandListener = object : CommandListener {
@@ -271,32 +288,36 @@ object JumpHandler : TypedActionHandler {
     // When the Enter key is pressed
     private val enterActionHandler: EditorActionHandler = object : EditorActionHandler() {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-            if (lastMarks.isEmpty()) {
-                stop(editor)
-                return
-            }
-            // 选择全局最近匹配（跨分屏场景），否则使用第一个
-            val chosen = lastMarks.firstOrNull { it.isNearest } ?: lastMarks[0]
-            val targetEditor = chosen.sourceEditor ?: editor
+            handleEnter(editor)
+        }
+    }
 
-            // Treesitter 模式下且是范围标签，选中范围
-            if (currentMode == Mode.TREESITTER && chosen.rangeEnd > chosen.offset) {
-                val c = targetEditor.caretModel.currentCaret
-                c.removeSelection()
-                c.setSelection(chosen.offset, chosen.rangeEnd)
-                c.moveToOffset(chosen.offset)
-                targetEditor.contentComponent.requestFocus()
-                stop(targetEditor)
-                onJump?.invoke()
-                return
-            }
+    private fun handleEnter(editor: Editor) {
+        if (lastMarks.isEmpty()) {
+            stop(editor)
+            return
+        }
+        // 选择全局最近匹配（跨分屏场景），否则使用第一个
+        val chosen = lastMarks.firstOrNull { it.isNearest } ?: lastMarks[0]
+        val targetEditor = chosen.sourceEditor ?: editor
 
-            // 普通跳转
-            moveToOffset(targetEditor, chosen.offset)
+        // Treesitter 模式下且是范围标签，选中范围
+        if (currentMode == Mode.TREESITTER && chosen.rangeEnd > chosen.offset) {
+            val c = targetEditor.caretModel.currentCaret
+            c.removeSelection()
+            c.setSelection(chosen.offset, chosen.rangeEnd)
+            c.moveToOffset(chosen.offset)
             targetEditor.contentComponent.requestFocus()
             stop(targetEditor)
             onJump?.invoke()
+            return
         }
+
+        // 普通跳转
+        moveToOffset(targetEditor, chosen.offset)
+        targetEditor.contentComponent.requestFocus()
+        stop(targetEditor)
+        onJump?.invoke()
     }
 
 
@@ -420,6 +441,10 @@ object JumpHandler : TypedActionHandler {
         manager.setActionHandler(IdeActions.ACTION_EDITOR_BACKSPACE, backSpaceActionHandler)
         mOldEnterActionHandler = manager.getActionHandler(IdeActions.ACTION_EDITOR_ENTER)
         manager.setActionHandler(IdeActions.ACTION_EDITOR_ENTER, enterActionHandler)
+        if (!enterDispatcherAdded) {
+            KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(enterKeyDispatcher)
+            enterDispatcherAdded = true
+        }
 
         setGrayColor(editor, true, mode);
 
@@ -459,6 +484,10 @@ object JumpHandler : TypedActionHandler {
             }
             if (mOldEnterActionHandler != null) {
                 manager.setActionHandler(IdeActions.ACTION_EDITOR_ENTER, mOldEnterActionHandler!!)
+            }
+            if (enterDispatcherAdded) {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(enterKeyDispatcher)
+                enterDispatcherAdded = false
             }
             // 移除所有画布
             canvasMap.forEach { (ed, canvas) ->
