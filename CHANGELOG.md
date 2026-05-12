@@ -2,6 +2,10 @@
 
 # vim-flash Changelog
 
+## 1.0.7
+
+- fix(search): handle enter before IdeaVim default action
+
 ## 1.0.6
 
 - fix: resolve variable shadowing in MarksCanvas.kt

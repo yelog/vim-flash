@@ -83,6 +83,10 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
     ]]></description>
 
     <change-notes><![CDATA[
+        <h2>1.0.7</h2>
+        <ul>
+          <li>fix(search): handle enter before IdeaVim default action</li>
+        </ul>
         <h2>1.0.6</h2>
         <ul>
           <li>fix: resolve variable shadowing in MarksCanvas.kt</li>
