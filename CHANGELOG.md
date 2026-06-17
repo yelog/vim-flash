@@ -2,6 +2,11 @@
 
 # vim-flash Changelog
 
+## Unreleased
+
+- fix(search): avoid treating the Enter key that starts `flash.search` as an in-session confirmation
+- feat(search): add a setting to disable Enter-to-nearest-match confirmation
+
 ## 1.0.7
 
 - fix(search): handle enter before IdeaVim default action
@@ -118,5 +123,4 @@ Most of the intended features have already been implemented. This marks the offi
 ### Optimization
 
 - Jump to the most recent match by pressing Enter
-
 

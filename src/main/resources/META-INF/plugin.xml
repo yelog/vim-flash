@@ -73,6 +73,7 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
           <li>2. Label color: The first input box is the color of label text, and the second input box is the color of label background.</li>
           <li>3. Match color: The first input box is the color of match text, and the second input box is the color of match background.</li>
           <li>3. Match nearest color: The first input box is the color of match nearest text, and the second input box is the color of match nearest background.</li>
+          <li>4. Enter confirms nearest: Pressing Enter during flash search jumps to the nearest match. Disable this if you bind <code>flash.search</code> itself to <code>&lt;cr&gt;</code>.</li>
         </ul>
         </p>
 
@@ -83,6 +84,11 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
     ]]></description>
 
     <change-notes><![CDATA[
+        <h2>Unreleased</h2>
+        <ul>
+          <li>fix(search): avoid treating the Enter key that starts <code>flash.search</code> as an in-session confirmation</li>
+          <li>feat(search): add a setting to disable Enter-to-nearest-match confirmation</li>
+        </ul>
         <h2>1.0.7</h2>
         <ul>
           <li>fix(search): handle enter before IdeaVim default action</li>

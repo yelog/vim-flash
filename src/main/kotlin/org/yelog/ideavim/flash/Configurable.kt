@@ -22,7 +22,8 @@ class Configurable : Configurable {
             ui.autoJumpWhenSingle != config.autoJumpWhenSingle ||
             ui.scrolloff != config.scrolloff ||
             ui.searchAcrossSplits != config.searchAcrossSplits ||
-            ui.vimModeTimeout != config.vimModeTimeoutMillis
+            ui.vimModeTimeout != config.vimModeTimeoutMillis ||
+            ui.enterConfirmsNearestMatch != config.enterConfirmsNearestMatch
     }
 
     override fun getDisplayName(): String {
@@ -44,6 +45,7 @@ class Configurable : Configurable {
         config.scrolloff = ui.scrolloff
         config.searchAcrossSplits = ui.searchAcrossSplits
         config.vimModeTimeoutMillis = ui.vimModeTimeout
+        config.enterConfirmsNearestMatch = ui.enterConfirmsNearestMatch
     }
 
     override fun reset() {
@@ -72,5 +74,6 @@ class Configurable : Configurable {
         ui.scrolloff = config.scrolloff
         ui.searchAcrossSplits = config.searchAcrossSplits
         ui.vimModeTimeout = config.vimModeTimeoutMillis
+        ui.enterConfirmsNearestMatch = config.enterConfirmsNearestMatch
     }
 }

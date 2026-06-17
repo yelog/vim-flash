@@ -28,6 +28,7 @@ class ConfigUI {
     private lateinit var scrolloffTF:  JTextField // Added for form binding
     private lateinit var searchAcrossSplitsCB: javax.swing.JCheckBox
     private lateinit var vimModeTimeoutTF: JTextField
+    private lateinit var enterConfirmsNearestMatchCB: javax.swing.JCheckBox
 
     // Reset labels
     private lateinit var charactersResetLB: JLabel
@@ -40,6 +41,7 @@ class ConfigUI {
     private lateinit var searchAcrossSplitsResetLB: JLabel
     private lateinit var scrolloffResetLB: JLabel
     private lateinit var vimModeTimeoutResetLB: JLabel
+    private lateinit var enterConfirmResetLB: JLabel
 
     private var defaultBean: UserConfig.DataBean? = null
 
@@ -132,6 +134,15 @@ class ConfigUI {
         set(value) {
             vimModeTimeoutTF.text = value.toString()
         }
+    var enterConfirmsNearestMatch: Boolean
+        get() = try {
+            enterConfirmsNearestMatchCB.isSelected
+        } catch (e: Exception) {
+            UserConfig.DEFAULT_ENTER_CONFIRMS_NEAREST_MATCH
+        }
+        set(value) {
+            enterConfirmsNearestMatchCB.isSelected = value
+        }
 
     fun initReset(defaultBean: UserConfig.DataBean) {
         this.defaultBean = defaultBean
@@ -146,6 +157,7 @@ class ConfigUI {
         labelBeforeMatchCB.addChangeListener { updateResetStates() }
         autoJumpWhenSingleCB.addChangeListener { updateResetStates() }
         searchAcrossSplitsCB.addChangeListener { updateResetStates() }
+        enterConfirmsNearestMatchCB.addChangeListener { updateResetStates() }
 
         val colorPanels = listOf(
             labelFgTF, labelBgTF, labelHitFgTF, labelHitBgTF,
@@ -200,6 +212,11 @@ class ConfigUI {
         addResetAction(searchAcrossSplitsResetLB) {
             defaultBean?.let {
                 searchAcrossSplits = it.searchAcrossSplits
+            }
+        }
+        addResetAction(enterConfirmResetLB) {
+            defaultBean?.let {
+                enterConfirmsNearestMatch = it.enterConfirmsNearestMatch
             }
         }
         addResetAction(vimModeTimeoutResetLB) {
@@ -257,6 +274,10 @@ class ConfigUI {
         updateResetLabel(
             searchAcrossSplitsResetLB,
             searchAcrossSplits != d.searchAcrossSplits
+        )
+        updateResetLabel(
+            enterConfirmResetLB,
+            enterConfirmsNearestMatch != d.enterConfirmsNearestMatch
         )
         updateResetLabel(
             vimModeTimeoutResetLB,

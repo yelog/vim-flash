@@ -58,6 +58,7 @@ object JumpHandler : TypedActionHandler {
     private var activeEditor: Editor? = null
     private var vimModeTimeoutFuture: ScheduledFuture<*>? = null
     private var enterDispatcherAdded = false
+    private val enterConfirmState = EnterConfirmState()
 
     // 记录最近一次 DataContext，用于 stopAndDispatch 透传按键
     // --- remote offset 修正 ---
@@ -74,10 +75,17 @@ object JumpHandler : TypedActionHandler {
         if (!isStart || event.id != KeyEvent.KEY_PRESSED || event.keyCode != KeyEvent.VK_ENTER) {
             return@KeyEventDispatcher false
         }
+        if (!enterConfirmState.shouldConsumeEnter()) {
+            return@KeyEventDispatcher false
+        }
         val editor = activeEditor ?: return@KeyEventDispatcher false
         val focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().focusOwner
         if (focusOwner == null || (focusOwner != editor.contentComponent && !editor.contentComponent.isAncestorOf(focusOwner))) {
             return@KeyEventDispatcher false
+        }
+        if (!enterConfirmState.shouldHandleEnter()) {
+            event.consume()
+            return@KeyEventDispatcher true
         }
         handleEnter(editor)
         event.consume()
@@ -288,6 +296,9 @@ object JumpHandler : TypedActionHandler {
     // When the Enter key is pressed
     private val enterActionHandler: EditorActionHandler = object : EditorActionHandler() {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
+            if (!enterConfirmState.shouldHandleEnter()) {
+                return
+            }
             handleEnter(editor)
         }
     }
@@ -439,11 +450,20 @@ object JumpHandler : TypedActionHandler {
         manager.setActionHandler(IdeActions.ACTION_EDITOR_ESCAPE, escActionHandler)
         mOldBackSpaceActionHandler = manager.getActionHandler(IdeActions.ACTION_EDITOR_BACKSPACE)
         manager.setActionHandler(IdeActions.ACTION_EDITOR_BACKSPACE, backSpaceActionHandler)
-        mOldEnterActionHandler = manager.getActionHandler(IdeActions.ACTION_EDITOR_ENTER)
-        manager.setActionHandler(IdeActions.ACTION_EDITOR_ENTER, enterActionHandler)
-        if (!enterDispatcherAdded) {
-            KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(enterKeyDispatcher)
-            enterDispatcherAdded = true
+        val useEnterConfirm = enterConfirmState.start(mode.supportsEnterConfirm(), config.enterConfirmsNearestMatch) { arm ->
+            ApplicationManager.getApplication().invokeLater({
+                arm()
+            }, nonModalModalityState())
+        }
+        if (useEnterConfirm) {
+            mOldEnterActionHandler = manager.getActionHandler(IdeActions.ACTION_EDITOR_ENTER)
+            manager.setActionHandler(IdeActions.ACTION_EDITOR_ENTER, enterActionHandler)
+            if (!enterDispatcherAdded) {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(enterKeyDispatcher)
+                enterDispatcherAdded = true
+            }
+        } else {
+            mOldEnterActionHandler = null
         }
 
         setGrayColor(editor, true, mode);
@@ -489,6 +509,7 @@ object JumpHandler : TypedActionHandler {
                 KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(enterKeyDispatcher)
                 enterDispatcherAdded = false
             }
+            enterConfirmState.stop()
             // 移除所有画布
             canvasMap.forEach { (ed, canvas) ->
                 val parent = canvas.parent
@@ -701,5 +722,9 @@ object JumpHandler : TypedActionHandler {
     private fun cancelVimModeTimeout() {
         vimModeTimeoutFuture?.cancel(false)
         vimModeTimeoutFuture = null
+    }
+
+    private fun Mode.supportsEnterConfirm(): Boolean {
+        return this == Mode.SEARCH || this == Mode.TREESITTER || this == Mode.REMOTE
     }
 }

@@ -119,6 +119,7 @@ Find `Settings -> Others Settings -> vim-flash` to configure the plugin.
     * Match nearest color: The first input box is the color of match nearest text, and the second input box is the color of match nearest background.
     * Label Position: This is the position of the label. Default is false which meas it will be displayed after the match. If set to true, it will be displayed before the match.
     * Auto Jump: If this is set to true, them the plugin will automatically jump when there is only one match.
+    * Enter confirms nearest: Pressing Enter during flash search jumps to the nearest match. Disable this if you bind `flash.search` itself to `<cr>`.
 - flash.[find,find_backward,till,till_backward,repeat,repeat_backward]
     * Scroll Off: This is the number of lines to keep above and below the cursor when jumping to a match. Default is 4.
     * Timeout cancel (ms): Controls how long (in milliseconds) Vim-style `flash.*` actions stay active while waiting for the next key. `-1` disables the timeout (default). Setting it to a positive value like `1500` automatically exits the mode (equivalent to pressing `Esc`) if no key is pressed within that time after a jump.
