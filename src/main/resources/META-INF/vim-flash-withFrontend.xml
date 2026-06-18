@@ -1,0 +1,3 @@
+<idea-plugin>
+    <!-- Marker descriptor loaded when the JetBrains Client frontend module is available. -->
+</idea-plugin>

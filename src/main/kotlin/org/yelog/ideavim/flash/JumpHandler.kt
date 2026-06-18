@@ -2,7 +2,6 @@ package org.yelog.ideavim.flash
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.application.ApplicationManager
@@ -431,11 +430,11 @@ object JumpHandler : TypedActionHandler {
      */
     fun start(mode: Mode, anActionEvent: AnActionEvent) {
         if (isStart) return
+        val editor = EditorContext.getEditor(anActionEvent.dataContext) ?: return
         this.searchString = ""
         this.currentMode = mode
         isStart = true
         remoteOriginOffset = -1
-        val editor = anActionEvent.getData(CommonDataKeys.EDITOR) ?: return
         activeEditor = editor
         if (mode == Mode.REMOTE) {
             remoteOriginOffset = editor.caretModel.offset

@@ -2,16 +2,20 @@ package org.yelog.ideavim.flash
 
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.project.DumbAwareAction
+import org.yelog.ideavim.flash.utils.notify
 
 abstract class BaseAction : DumbAwareAction() {
     override fun update(e: AnActionEvent) {
-        val editor = e.getData(CommonDataKeys.EDITOR)
+        val editor = EditorContext.getEditor(e.dataContext)
         e.presentation.isEnabled = editor != null
     }
 
     override fun actionPerformed(e: AnActionEvent) {
+        if (EditorContext.getEditor(e.dataContext) == null) {
+            notify("No editor is available for vim-flash. In Remote Development, install/enable vim-flash in JetBrains Client and invoke it from the editor.")
+            return
+        }
         JumpHandler.start(getMode(), e)
     }
 

@@ -84,8 +84,9 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
     ]]></description>
 
     <change-notes><![CDATA[
-        <h2>Unreleased</h2>
+        <h2>1.0.8</h2>
         <ul>
+          <li>fix(remote-dev): declare frontend compatibility so editor UI actions load in JetBrains Remote Development clients</li>
           <li>fix(search): avoid treating the Enter key that starts <code>flash.search</code> as an in-session confirmation</li>
           <li>feat(search): add a setting to disable Enter-to-nearest-match confirmation</li>
         </ul>
@@ -192,6 +193,8 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
     ]]></change-notes>
 
     <depends>com.intellij.modules.platform</depends>
+    <!-- vim-flash is editor UI/key-input driven, so it must be available in JetBrains Client during Remote Development. -->
+    <depends optional="true" config-file="vim-flash-withFrontend.xml">intellij.platform.frontend</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="org.yelog.ideavim.flash.UserConfig"/>

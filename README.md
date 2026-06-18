@@ -137,6 +137,14 @@ Find `Settings -> Others Settings -> vim-flash` to configure the plugin.
   Download the [latest release](https://github.com/yelog/vim-flash/releases/latest) and install it manually using
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
 
+## Remote Development
+
+vim-flash is an editor UI plugin: it reads the active editor, intercepts typed keys, and draws labels in the editor component. In JetBrains Remote Development, these parts need to run in JetBrains Client.
+
+- Prefer installing vim-flash from JetBrains Marketplace so Remote Development plugin sync can install it on the Client side.
+- Keep the `.ideavimrc` mappings available in the remote session, for example `nmap s <Action>(flash.search)`.
+- If you install from a local ZIP/JAR, JetBrains plugin sync may not copy it between Host and Client automatically; install it on the side where the editor UI runs.
+
 ## Planned Features
 
 - From GitHub issues and PRs

@@ -2,8 +2,9 @@
 
 # vim-flash Changelog
 
-## Unreleased
+## 1.0.8
 
+- fix(remote-dev): declare frontend compatibility so editor UI actions load in JetBrains Remote Development clients
 - fix(search): avoid treating the Enter key that starts `flash.search` as an in-session confirmation
 - feat(search): add a setting to disable Enter-to-nearest-match confirmation
 
@@ -123,4 +124,3 @@ Most of the intended features have already been implemented. This marks the offi
 ### Optimization
 
 - Jump to the most recent match by pressing Enter
-
