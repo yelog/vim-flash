@@ -8,6 +8,11 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    ignore:
+      # Gradle 9 needs the IntelliJ Platform Gradle Plugin 2.x migration first;
+      # org.jetbrains.intellij 1.17.4 references removed internal Gradle APIs.
+      - dependency-name: "gradle"
+        update-types: ["version-update:semver-major"]
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
