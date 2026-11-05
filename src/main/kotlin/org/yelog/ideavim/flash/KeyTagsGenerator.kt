@@ -1,10 +1,18 @@
 package org.yelog.ideavim.flash
 
 object KeyTagsGenerator {
-    // maybe has a math method
+    internal fun normalizeKeys(keys: String): String = keys.filterNot { it.isWhitespace() }.toSet().joinToString("")
+
+    /** Empty labels preserve matches when the remaining alphabet cannot distinguish them. */
     fun createTagsTree(targetCount: Int, keys: String): List<String> {
+        if (targetCount <= 0) return emptyList()
+        val alphabet = normalizeKeys(keys)
+        if (alphabet.isEmpty() || (alphabet.length == 1 && targetCount > 1)) {
+            return List(targetCount) { "" }
+        }
+
         val res: MutableList<String> = ArrayList()
-        recur(targetCount, keys, "", res, )
+        recur(targetCount, alphabet, "", res)
         return res
     }
 

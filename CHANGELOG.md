@@ -2,6 +2,13 @@
 
 # vim-flash Changelog
 
+## 1.0.10
+
+- fix(search): prevent freezes and stack overflows when available label characters are empty, repeated, or insufficient
+- fix(search): retain all match highlights and Enter confirmation when labels are unavailable, and allow continued typing to narrow the search
+- fix(settings): normalize duplicate and whitespace label characters and require at least two distinct characters before saving
+- build(test): align the test SDK and compatibility checks with the supported IntelliJ 2023.1 baseline
+
 ## 1.0.9
 
 - fix(settings): declare the vim-flash settings page display name

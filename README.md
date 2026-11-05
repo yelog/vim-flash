@@ -112,7 +112,7 @@ Planned improvements:
 Find `Settings -> Others Settings -> vim-flash` to configure the plugin.
 
 - flash.search
-    * Characters: This This is the sequence of letters used in order of proximity from nearest to farthest between the match and the current cursor.
+    * Characters: Label characters in priority order, from the nearest match to the farthest. Use at least two distinct characters; spaces and duplicates are removed when saving. If a search temporarily leaves too few usable label characters, matches remain highlighted: keep typing to narrow the search, or press Enter to select the nearest match when Enter confirmation is enabled.
     * Label Color: The first input box is the color of label text, and the second input box is the color of label background.
     * Label hit Color: The first input box is the color of label hit text, and the second input box is the color of label hit background.
     * Match Color: The first input box is the color of match text, and the second input box is the color of match background.

@@ -114,6 +114,7 @@ class Search : Finder {
                 remainCharacter = remainCharacter.replace(ch.toString(), "", true)
             }
 
+            // Empty tags retain every match when typing has exhausted the usable alphabet.
             val tags = KeyTagsGenerator.createTagsTree(allMatches.size, remainCharacter)
 
             // 计算最近匹配：始终优先当前分屏（发起搜索的编辑器）

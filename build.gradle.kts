@@ -76,6 +76,7 @@ tasks {
 
     runPluginVerifier {
         ideVersions.set(listOf(
+            "IC-2023.1.7",
             "IC-2024.3.7"
         ))
     }

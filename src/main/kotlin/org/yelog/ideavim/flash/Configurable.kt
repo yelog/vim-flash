@@ -1,6 +1,7 @@
 package org.yelog.ideavim.flash
 
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.options.ConfigurationException
 import org.yelog.ideavim.flash.UserConfig.DataBean
 import javax.swing.JComponent
 
@@ -31,7 +32,12 @@ class Configurable : Configurable {
     }
 
     override fun apply() {
-        config.characters = ui.characters.orEmpty()
+        val characters = KeyTagsGenerator.normalizeKeys(ui.characters.orEmpty())
+        if (characters.length < 2) {
+            throw ConfigurationException(MyBundle.CHARACTERS_VALIDATION_ERROR)
+        }
+        config.characters = characters
+        ui.characters = characters
         config.labelFg = ui.labelFg
         config.labelBg = ui.labelBg
         config.labelHitFg = ui.labelHitFg

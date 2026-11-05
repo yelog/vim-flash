@@ -337,6 +337,9 @@ object JumpHandler : TypedActionHandler {
                 stop(editor)
             }
 
+            // Vim F/T moves and paints its own highlighters without a search canvas.
+            currentMode.isVimMode() -> return
+
             (marks.size == 1 && (config.autoJumpWhenSingle || marks[0].hintMark)) -> {
                 val targetEditor = marks[0].sourceEditor ?: editor
 
@@ -367,11 +370,6 @@ object JumpHandler : TypedActionHandler {
                     caret.moveToOffset(marks[0].offset)
                     stop(targetEditor)
                     onJump?.invoke()
-                    return
-                }
-
-                // VimF 保持
-                if (currentMode.isVimMode()) {
                     return
                 }
 

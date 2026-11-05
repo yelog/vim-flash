@@ -91,10 +91,6 @@ class MarksCanvas : JComponent() {
                 }
 
                 val keyTag = it.first.keyTag
-                if (keyTag.isEmpty()) {
-                    // Vim F/T actions don't need canvas painting; they have dedicated editor highlighters
-                    return@forEach
-                }
                 val charBounds = mFontMetrics.getStringBounds("x", g).bounds
                 val bounds = mFontMetrics.getStringBounds(keyTag, g).bounds
                 // draw match text background
@@ -132,6 +128,9 @@ class MarksCanvas : JComponent() {
                         )
                     }
                 }
+
+                // Searches still show their matches while waiting for enough label characters.
+                if (keyTag.isEmpty()) return@forEach
 
                 // already hit
                 var markOffset: java.awt.Point
