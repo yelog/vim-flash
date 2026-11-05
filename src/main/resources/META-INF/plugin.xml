@@ -198,7 +198,7 @@ xmap , &lt;Action&gt;(flash.repeat_backward)
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="org.yelog.ideavim.flash.UserConfig"/>
-        <applicationConfigurable instance="org.yelog.ideavim.flash.Configurable"/>
+        <applicationConfigurable instance="org.yelog.ideavim.flash.Configurable" displayName="vim-flash"/>
         <notificationGroup id="org.yelog.ideavim.flash" displayType="BALLOON" isLogByDefault="true"/>
     </extensions>
 
