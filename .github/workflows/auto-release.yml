@@ -1,94 +1,116 @@
-# GitHub Actions Workflow for auto-releasing when a new tag is pushed.
-# Triggered on tag push, creates a GitHub Release with changelog from CHANGELOG.md.
-
+# Push vX.Y.Z (or vX.Y.Z-rc.1) to publish an installable GitHub Release.
+# Marketplace uploads are performed manually using the release ZIP.
 name: Auto Release
 
 on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to package (v1.0.9; historical 1.0.8 also supported)'
+        required: true
+        type: string
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:
   release:
-    name: Create Release
+    name: Test, Package and Release
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-
-      # Check out current repository
-      - name: Fetch Sources
+      - name: Fetch Sources at Tag
         uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ inputs.tag || github.ref_name }}
 
-      # Check if release already exists for this tag
-      - name: Check if release exists
-        id: check_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Historical tags may predate these helpers. Run a manual rebuild from a
+      # branch containing this workflow; read only the helpers from that branch.
+      - name: Fetch Release Helpers
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          path: .release-tools
+          sparse-checkout: scripts
+
+      - name: Select Release Helpers
+        shell: bash
         run: |
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
-          if gh release view "$TAG_NAME" &>/dev/null; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-            echo "Release $TAG_NAME already exists, skipping..."
+          if [[ -d .release-tools/scripts ]]; then
+            cp .release-tools/scripts/release.py "$RUNNER_TEMP/release.py"
           else
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "Creating new release for $TAG_NAME"
+            cp scripts/release.py "$RUNNER_TEMP/release.py"
           fi
 
-      # Set up Java environment for the next steps
+      - name: Validate Version and Release Notes
+        run: python3 "$RUNNER_TEMP/release.py" --root "$GITHUB_WORKSPACE" --tag "$RELEASE_TAG" --notes-file "$RUNNER_TEMP/release-notes.md"
+
+      - name: Gradle Wrapper Validation
+        uses: gradle/wrapper-validation-action@v3.5.0
+
       - name: Setup Java
-        if: steps.check_release.outputs.exists == 'false'
         uses: actions/setup-java@v6.1.0
         with:
           distribution: zulu
           java-version: 17
 
-      # Setup Gradle
       - name: Setup Gradle
-        if: steps.check_release.outputs.exists == 'false'
         uses: gradle/actions/setup-gradle@v6.4.1
 
-      # Extract version from tag and changelog from CHANGELOG.md
-      - name: Extract Version and Changelog
-        if: steps.check_release.outputs.exists == 'false'
-        id: extract
+      - name: Test and Build Plugin
+        run: ./gradlew test buildPlugin
+
+      - name: Validate Plugin ZIP
+        shell: bash
         run: |
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
-          VERSION="${TAG_NAME#v}"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          VERSION="${RELEASE_TAG#v}"
+          python3 "$RUNNER_TEMP/release.py" --root "$GITHUB_WORKSPACE" --tag "$RELEASE_TAG" \
+            --archive "build/distributions/vim-flash-$VERSION.zip"
 
-          # Extract changelog for this version from CHANGELOG.md
-          # Format: ## X.Y.Z followed by lines until next ## or end of file
-          CHANGELOG=$(sed -n "/^## ${VERSION}$/,/^## /p" CHANGELOG.md | sed '1d;$d' | sed '/^$/d')
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: plugin-${{ env.RELEASE_TAG }}
+          path: build/distributions/*.zip
+          if-no-files-found: error
 
-          if [ -z "$CHANGELOG" ]; then
-            CHANGELOG="Release $VERSION"
+      # Upload to a draft first so users never see a release without its ZIP.
+      # A retry can finish an existing draft without replacing a published ZIP.
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          VERSION="${RELEASE_TAG#v}"
+          ASSET_NAME="vim-flash-$VERSION.zip"
+          PRERELEASE=false
+          if [[ "$VERSION" == *-* ]]; then PRERELEASE=true; fi
+
+          if gh release view "$RELEASE_TAG" --json isDraft,assets > "$RUNNER_TEMP/release.json"; then
+            if jq -e '.isDraft == false' "$RUNNER_TEMP/release.json" > /dev/null; then
+              if jq -e --arg name "$ASSET_NAME" 'any(.assets[]; .name == $name)' "$RUNNER_TEMP/release.json" > /dev/null; then
+                echo "Release $RELEASE_TAG already contains $ASSET_NAME; leaving it unchanged."
+                exit 0
+              fi
+              echo "::error::Published release $RELEASE_TAG has no $ASSET_NAME. Inspect it before changing public assets."
+              exit 1
+            fi
+          else
+            gh release create "$RELEASE_TAG" --verify-tag --draft --title "$RELEASE_TAG" \
+              --notes-file "$RUNNER_TEMP/release-notes.md" --prerelease="$PRERELEASE"
           fi
 
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      # Build plugin
-      - name: Build Plugin
-        if: steps.check_release.outputs.exists == 'false'
-        run: ./gradlew buildPlugin
-
-      # Create GitHub Release
-      - name: Create GitHub Release
-        if: steps.check_release.outputs.exists == 'false'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TAG_NAME="${{ steps.extract.outputs.tag_name }}"
-          VERSION="${{ steps.extract.outputs.version }}"
-
-          # Find the built plugin zip file
-          PLUGIN_FILE=$(ls build/distributions/*.zip | head -n1)
-
-          # Create release with changelog
-          gh release create "$TAG_NAME" \
-            --title "$TAG_NAME" \
-            --notes "${{ steps.extract.outputs.changelog }}" \
-            "$PLUGIN_FILE"
+          gh release upload "$RELEASE_TAG" "build/distributions/$ASSET_NAME" --clobber
+          gh release edit "$RELEASE_TAG" --title "$RELEASE_TAG" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" --prerelease="$PRERELEASE" --draft=false

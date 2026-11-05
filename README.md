@@ -145,6 +145,25 @@ vim-flash is an editor UI plugin: it reads the active editor, intercepts typed k
 - Keep the `.ideavimrc` mappings available in the remote session, for example `nmap s <Action>(flash.search)`.
 - If you install from a local ZIP/JAR, JetBrains plugin sync may not copy it between Host and Client automatically; install it on the side where the editor UI runs.
 
+## Releasing
+
+1. Set `pluginVersion` in `gradle.properties` and add a nonempty `## X.Y.Z` section to `CHANGELOG.md`. Use the same version in both files. Gradle injects that version and its rendered change notes into the packaged `plugin.xml`; do not duplicate them in the source XML.
+2. Validate and build with Java 17 (replace `1.0.9` with the intended version):
+
+   ```bash
+   python3 -B -m unittest discover -s scripts -p 'test_*.py'
+   python3 scripts/release.py --tag v1.0.9
+   ./gradlew test buildPlugin
+   python3 scripts/release.py --tag v1.0.9 --archive build/distributions/vim-flash-1.0.9.zip
+   ```
+
+3. Commit the reviewed release changes, create an annotated `vX.Y.Z` tag on that commit, and push the commit and that tag. The **Auto Release** workflow tests and builds the tagged sources, checks the packaged version, attaches `vim-flash-X.Y.Z.zip`, then publishes the GitHub Release with the matching changelog. Tags such as `v1.1.0-rc.1` produce prereleases.
+4. Download the ZIP under **Assets** on the [release page](https://github.com/yelog/vim-flash/releases). It can be installed with **Install plugin from disk…** or uploaded manually to the [JetBrains Marketplace plugin page](https://plugins.jetbrains.com/plugin/25101-vim-flash). Do not use GitHub's automatically generated **Source code** archives. The CI does not publish to Marketplace or require Marketplace credentials.
+
+To rebuild an existing tag, run **Actions → Auto Release → Run workflow** from a branch containing this workflow and enter the tag. This also supports historical tags without `v`, such as `1.0.8`. A retry can finish an existing draft; it does not overwrite a ZIP that is already published. Ordinary **Build** runs upload the original plugin ZIP inside the downloadable workflow artifact and do not create or delete release drafts.
+
+The maintainer's local `$vim-flash-release` Skill automates these preparation and publication steps. For example: “使用 $vim-flash-release 准备 1.0.9” prepares local changes; “使用 $vim-flash-release 发布 1.0.9 到 GitHub” also commits, tags, pushes, and waits for the downloadable package. Marketplace upload remains manual.
+
 ## Planned Features
 
 - From GitHub issues and PRs
