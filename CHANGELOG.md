@@ -2,6 +2,11 @@
 
 # vim-flash Changelog
 
+## 1.0.9
+
+- fix(settings): declare the vim-flash settings page display name
+- build(release): provide validated installation ZIPs on GitHub Releases with version-matched change notes
+
 ## 1.0.8
 
 - fix(remote-dev): declare frontend compatibility so editor UI actions load in JetBrains Remote Development clients
