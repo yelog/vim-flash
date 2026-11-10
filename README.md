@@ -162,7 +162,7 @@ vim-flash is an editor UI plugin: it reads the active editor, intercepts typed k
 
 To rebuild an existing tag, run **Actions → Auto Release → Run workflow** from a branch containing this workflow and enter the tag. This also supports historical tags without `v`, such as `1.0.8`. A retry can finish an existing draft; it does not overwrite a ZIP that is already published. Ordinary **Build** runs upload the original plugin ZIP inside the downloadable workflow artifact and do not create or delete release drafts.
 
-The maintainer's local `$vim-flash-release` Skill automates these preparation and publication steps. For example: “使用 $vim-flash-release 准备 1.0.9” prepares local changes; “使用 $vim-flash-release 发布 1.0.9 到 GitHub” also commits, tags, pushes, and waits for the downloadable package. Marketplace upload remains manual.
+The repository-local [`$vim-flash-release` Skill](.agents/skills/vim-flash-release/SKILL.md) automates these preparation and publication steps and is available only while working in this repository. For example: “使用 $vim-flash-release 准备 1.0.9” prepares local changes; “使用 $vim-flash-release 发布 1.0.9 到 GitHub” also commits, tags, pushes, and waits for the downloadable package. Marketplace upload remains manual.
 
 ## Planned Features
 

@@ -12,7 +12,7 @@
 2. Update `.github/workflows/auto-release.yml` to build the requested tag, validate its package, and publish assets before making the release public. Handle existing drafts and completed-release retries.
 3. Remove draft creation from `.github/workflows/build.yml` and remove the automatic Marketplace workflow. Preserve ordinary build, tests, inspection, and compatibility checks.
 4. Remove duplicated source change notes from `plugin.xml`; retain Gradle generation from `CHANGELOG.md`. Document release and download steps in `README.md`.
-5. Create the personal `vim-flash-release` Skill under `~/.codex/skills`. Include preparation, scoped commit/tag/push when requested, workflow monitoring, and download verification.
+5. Create the repository-local `vim-flash-release` Skill under `.agents/skills`. Include preparation, scoped commit/tag/push when requested, workflow monitoring, and download verification.
 6. Validate the Skill, workflows, helper, and a real plugin build with `./gradlew test buildPlugin`. Inspect the packaged version and change notes. Do not create a release commit, tag, push, or Marketplace upload during implementation.
 
 ## Validation completed

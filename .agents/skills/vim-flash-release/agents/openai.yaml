@@ -1,0 +1,4 @@
+interface:
+  display_name: "vim-flash 发布"
+  short_description: "准备版本与更新说明，发布 GitHub 插件 ZIP 并跟进构建结果"
+  default_prompt: "使用 $vim-flash-release 准备 vim-flash 的下一个版本，先检查版本、提交记录和发布配置。"
